@@ -1,49 +1,125 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─────────────────────────────────────────────────────────────────────────────
+   Design system — transcribed from the DoctorLeandak spec sheet.
+   The sheet's rule is "use only these colours" and "use gradients as defined",
+   so nothing here is invented. Where a value is derived, the comment says how.
+
+   One deliberate departure: the sheet's type scale is a PHONE scale (Page Title
+   28px). A website read at arm's length on a 1440px display needs more, so the
+   headings use clamp() with the sheet's value as the mobile floor. The tokens
+   and the ratios are the sheet's; only the upper bound is ours.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root{
+  /* COLORS (use only these) */
+  --primary-teal:#2B91A7;
+  --light-teal:#54ACBF;
+  --dark-teal:#275059;
+  --mid-teal:#4494A6;
+  --blue-accent:#376B97;      /* buttons */
+  --navy:#122331;
+  --scaffold-grey:#F5F7F8;
+  --emergency-red:#C7191C;
+  --white:#FFFFFF;
+
+  /* GRADIENTS (use as defined) */
+  --grad-appbar:linear-gradient(135deg,#54ACBF 0%,#2B91A7 52%,#275059 100%);
+  --grad-button:linear-gradient(135deg,#376B97 0%,#122331 100%);
+  --grad-bottomnav:linear-gradient(135deg,#449AA6 0%,#1A3940 100%);
+  --grad-card:linear-gradient(160deg,rgba(84,172,191,.8) 0%,rgba(59,130,145,.9) 100%);
+
+  /* BORDER RADIUS — Buttons 24 · Cards 20 · Inputs 18 */
+  --r-button:24px;
+  --r-card:20px;
+  --r-input:18px;
+
+  /* SHADOWS — Soft · Y:8 · Blur:30 · Opacity 12% */
+  --shadow:0 8px 30px rgba(18,35,49,.12);
+  --shadow-lg:0 16px 48px rgba(18,35,49,.24);
+
+  /* SPACING — 8px grid */
+  --pad-outer:24px;
+  --gap-section:32px;
+  --gap-item:16px;
+
+  /* COMPONENTS */
+  --btn-h:56px;               /* Buttons: Height 56px */
+  --card-glass:rgba(255,255,255,.10);   /* Cards: Glass · 10% White */
+  --card-border:rgba(255,255,255,.18);  /* Soft Border */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  background:var(--navy);
+  color:var(--white);
+  /* The sheet's Body is 14px, which is a phone size. 16px is the smallest a web
+     body should be; the sheet's 14px survives as .bodySm for captions. */
+  font-size:16px;
+  line-height:1.9;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 
-html {
-  height: 100%;
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+ul,ol{list-style:none}
+
+/* ── Type scale ─────────────────────────────────────────────────────────────
+   Sheet: Page Title 28 Bold · Section Title 18 Bold · Body Large 16 · Body 14 */
+.pageTitle{font-size:clamp(28px,4.6vw,54px);font-weight:800;line-height:1.34;letter-spacing:-.5px}
+.sectionTitle{font-size:clamp(18px,2.7vw,34px);font-weight:700;line-height:1.45;letter-spacing:-.3px}
+.bodyLarge{font-size:clamp(16px,1.4vw,18px);font-weight:400;line-height:1.9}
+.bodySm{font-size:14px;font-weight:400;line-height:1.85}
+
+/* ── Primitives ─────────────────────────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding-inline:var(--pad-outer)}
+.section{padding-block:clamp(56px,7vw,104px)}
+
+.sectionHead{max-width:66ch;margin-bottom:var(--gap-section)}
+.sectionHead.mid{margin-inline:auto;text-align:center}
+.sectionHead p{color:rgba(255,255,255,.76);margin-top:12px}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:9px;
+  background:rgba(84,172,191,.16);border:1px solid rgba(84,172,191,.42);
+  color:#bfe6ef;border-radius:999px;padding:8px 18px;
+  font-size:13.5px;font-weight:700;line-height:1;
+}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--light-teal);display:block}
+
+/* Buttons: Height 56px · Gradient · radius 24 */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  min-height:var(--btn-h);padding:0 34px;border-radius:var(--r-button);
+  font-weight:700;font-size:16px;line-height:1.2;border:0;cursor:pointer;
+  transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
+}
+.btnPrimary{background:var(--grad-button);color:var(--white);box-shadow:var(--shadow)}
+.btnPrimary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btnLight{background:var(--white);color:var(--navy)}
+.btnLight:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.btnGhost{background:transparent;color:var(--white);border:1.5px solid rgba(255,255,255,.42)}
+.btnGhost:hover{border-color:var(--white);background:rgba(255,255,255,.08)}
+.btnFull{width:100%}
+
+/* Cards: Glass · 10% White · Blur · Soft Border · radius 20 */
+.glass{
+  background:var(--card-glass);
+  border:1px solid var(--card-border);
+  border-radius:var(--r-card);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  box-shadow:var(--shadow);
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+/* Not on the sheet, but a keyboard user has to be able to see where they are.
+   The colour is the sheet's. */
+a:focus-visible,button:focus-visible,summary:focus-visible{
+  outline:3px solid var(--light-teal);outline-offset:3px;border-radius:6px;
 }
 
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important;animation:none!important}
 }
