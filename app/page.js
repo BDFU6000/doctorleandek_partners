@@ -147,6 +147,18 @@ const FAQ = [
 const TICKER = [...ROLES, ...ROLES];
 
 /**
+ * One segment of the joining road: a single cubic drawn in a 100×100 box,
+ * leaving one dot and arriving at the next.
+ *
+ * The two control points sit on OPPOSITE sides of the axis, which is what makes
+ * this a wave rather than a bulge — and it means the curve leaves each dot
+ * heading down-and-right and arrives at the next one heading down-and-right
+ * too. Consecutive segments therefore meet at the same tangent, so four
+ * separate paths read as one continuous line with no kink at the joints.
+ */
+const STEP_WAVE = "M50 0C92 28 8 72 50 100";
+
+/**
  * Section label: index numeral, caption, hairline.
  *
  * The numeral and the caption stay adjacent and the rule fills what is left —
@@ -438,6 +450,19 @@ export default function PartnersPage() {
               {STEPS.map((st, i) => (
                 <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i }}>
                   <span className={s.stepNo}>{i + 1}</span>
+                  {/* No segment after the last dot: a road that carries on past
+                      the final step points somewhere the page does not go. */}
+                  {i < STEPS.length - 1 ? (
+                    <svg
+                      className={s.stepWave}
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                    >
+                      <path className={s.waveBase} d={STEP_WAVE} />
+                      <path className={s.waveFill} d={STEP_WAVE} />
+                    </svg>
+                  ) : null}
                   <div className={s.stepBody}>
                     <h3>{st.title}</h3>
                     <p>{st.text}</p>

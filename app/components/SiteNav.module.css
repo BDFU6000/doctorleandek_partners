@@ -30,9 +30,9 @@
 }
 
 /* ── Brand ────────────────────────────────────────────────────────────────
-   The mark is the brand cross built from two bars rather than an icon file, so
-   it inherits the ramp and costs no request. It turns on hover, the smallest
-   possible nod to the orbit in the hero. */
+   The mark is an inline crescent rather than an icon file, so it inherits the
+   ramp and costs no request. It turns on hover, the smallest possible nod to
+   the orbit in the hero. */
 .brand { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
 
 .mark {
