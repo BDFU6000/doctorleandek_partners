@@ -1,98 +1,183 @@
-/* Retinted onto the single-hue ramp, and restructured as a rule-divided list
-   rather than six floating cards — the editorial references divide with lines,
-   not with boxes. */
+/* ── FAQ Network ────────────────────────────────────────────────────────────
+   Six nodes arranged in a hexagonal web. Each node is a circle (dot) that
+   expands a card on click. SVG edges connect them underneath. */
 
-.list {
-  max-width: 900px;
-  margin-inline: auto;
-  border-top: 1px solid var(--line);
-}
-
-.item {
-  border-bottom: 1px solid var(--line);
-  transition: background var(--e-slow);
-}
-.item[data-open] { background: var(--surface); }
-
-.head { margin: 0; }
-
-.trigger {
+.network {
+  position: relative;
   width: 100%;
+  /* height is set inline by ResizeObserver */
+}
+
+/* ── Edges (SVG) ─────────────────────────────────────────────────────────── */
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.edge {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
+  transition: stroke var(--e-slow), stroke-width var(--e-slow), opacity var(--e-slow);
+  opacity: 0.7;
+}
+
+.edgeLit {
+  stroke: var(--t-500);
+  stroke-width: 2;
+  stroke-dasharray: none;
+  opacity: 1;
+}
+
+/* ── Nodes ───────────────────────────────────────────────────────────────── */
+.node {
+  position: absolute;
+  /* Centre the node on its coordinate */
+  left: var(--nx);
+  top: var(--ny);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The clickable circle */
+.nodeDot {
+  position: relative;
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--t-900);
+  border: 1.5px solid var(--line-hi);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 26px 20px;
-  background: none;
-  border: 0;
-  color: inherit;
-  font: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.6;
-  letter-spacing: -.2px;
-  text-align: start;
+  justify-content: center;
   cursor: pointer;
+  flex: 0 0 auto;
+  transition: background var(--e-slow), border-color var(--e-slow),
+    box-shadow var(--e-slow), transform var(--e-spring);
+}
+.nodeDot:hover {
+  border-color: var(--t-400);
+  background: var(--surface-hi);
+  transform: scale(1.12);
+}
+.nodeActive .nodeDot {
+  background: var(--t-500);
+  border-color: var(--t-500);
+  box-shadow: var(--shadow-glow);
+  transform: scale(1.15);
+}
+
+/* Pulse ring on active node */
+.nodeActive .nodeDot::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--t-500);
+  opacity: 0;
+  animation: nodeRing 1.8s ease-out infinite;
+}
+@keyframes nodeRing {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+.nodeNum {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
   transition: color var(--e-fast);
 }
-.trigger:hover { color: var(--t-300); }
+.nodeActive .nodeNum { color: var(--t-950); }
 
-/* A plus that rotates into a minus: one bar turns and fades, the other stays.
-   Cheaper and steadier than swapping a glyph, which reflows the row. */
-.sign {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  border: 1px solid var(--line-hi);
-  transition: background var(--e-slow), transform var(--e-slow), border-color var(--e-slow);
-}
-/* Physical `left`/`top`: `inset-inline-start` resolves to `right` in RTL, and
-   pairing that with a physical translate lands the bar a half-width off centre. */
-.sign i {
+/* ── Card (expands below the dot) ────────────────────────────────────────── */
+.nodeCard {
   position: absolute;
-  top: 50%;
+  /* Default: card drops below the dot */
+  top: calc(100% + 12px);
   left: 50%;
-  translate: -50% -50%;
-  background: var(--t-300);
-  border-radius: 2px;
-  transition: transform var(--e-slow), opacity var(--e-slow), background var(--e-slow);
-}
-.sign i:first-child { width: 12px; height: 2px; }
-.sign i:last-child { width: 2px; height: 12px; }
-
-.item[data-open] .sign { background: var(--t-500); border-color: var(--t-500); transform: rotate(180deg); }
-.item[data-open] .sign i { background: var(--t-950); }
-.item[data-open] .sign i:last-child { transform: scaleY(0); opacity: 0; }
-
-/* 0fr → 1fr is what makes an unknown height animatable. The inner element must
-   carry `min-height:0`, or the grid row refuses to shrink below its content. */
-.panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--e-slow);
-}
-.item[data-open] .panel { grid-template-rows: 1fr; }
-
-.panelInner {
-  min-height: 0;
-  overflow: hidden;
-  visibility: hidden;
+  transform: translateX(-50%);
+  width: clamp(220px, 28vw, 300px);
+  background: var(--t-950);
+  border: 1px solid var(--line-hi);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-lg), var(--edge);
+  padding: 18px 20px 20px;
+  z-index: 10;
+  pointer-events: none;
   opacity: 0;
-  transition: opacity var(--e-slow), visibility var(--e-slow);
+  transform: translateX(-50%) translateY(-8px) scale(0.96);
+  transition: opacity var(--e-slow), transform var(--e-slow);
 }
-.item[data-open] .panelInner { visibility: visible; opacity: 1; }
+.nodeCardOpen {
+  pointer-events: auto;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
 
-.panelInner p {
+/* Nodes near the bottom: flip card above the dot */
+.node:nth-child(n+4) .nodeCard {
+  top: auto;
+  bottom: calc(100% + 12px);
+  transform: translateX(-50%) translateY(8px) scale(0.96);
+}
+.node:nth-child(n+4) .nodeCardOpen {
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Nodes on the right edge: shift card leftward */
+.node:nth-child(2) .nodeCard,
+.node:nth-child(3) .nodeCard {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(-8px) scale(0.96);
+}
+.node:nth-child(2) .nodeCardOpen,
+.node:nth-child(3) .nodeCardOpen {
+  transform: translateX(0) translateY(0) scale(1);
+}
+
+/* Nodes on the left edge: shift card rightward */
+.node:nth-child(5) .nodeCard,
+.node:nth-child(6) .nodeCard {
+  left: 0;
+  transform: translateX(0) translateY(-8px) scale(0.96);
+}
+.node:nth-child(5) .nodeCardOpen,
+.node:nth-child(6) .nodeCardOpen {
+  transform: translateX(0) translateY(0) scale(1);
+}
+
+.nodeQ {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 10px;
+  line-height: 1.6;
+  letter-spacing: -0.1px;
+}
+.nodeA {
+  font-size: 13.5px;
   color: var(--ink-2);
-  font-size: 15.5px;
-  max-width: 74ch;
-  padding: 0 20px 28px;
+  line-height: 1.85;
   margin: 0;
 }
 
-@media (max-width: 560px) {
-  .trigger { padding: 20px 4px; font-size: 16px; }
-  .panelInner p { padding: 0 4px 22px; }
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .nodeDot { width: 42px; height: 42px; }
+  .nodeNum { font-size: 11px; }
+  .nodeCard { width: clamp(180px, 72vw, 260px); padding: 14px 16px 16px; }
+  .nodeQ { font-size: 13px; }
+  .nodeA { font-size: 12.5px; }
 }

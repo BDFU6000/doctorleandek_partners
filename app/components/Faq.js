@@ -81,13 +81,8 @@ export default function Faq({ items }) {
           <div
             key={f.q}
             className={`${s.node} ${isActive ? s.nodeActive : ""}`}
-            style={{ "--nx": `${pos.x}%`, "--ny": `${pos.y}%` }}
             data-reveal=""
-            style={{
-              "--nx": `${pos.x}%`,
-              "--ny": `${pos.y}%`,
-              "--i": i,
-            }}
+            style={{ "--nx": `${pos.x}%`, "--ny": `${pos.y}%`, "--i": i }}
           >
             <button
               type="button"
