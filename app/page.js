@@ -448,23 +448,25 @@ export default function PartnersPage() {
                 you as each step scrolls into view. */}
             <ol className={s.steps}>
               {STEPS.map((st, i) => (
-                <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i, position: "relative" }}>
+                <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i }}>
                   <span className={s.stepNo}>{i + 1}</span>
                   <div className={s.stepBody}>
                     <h3>{st.title}</h3>
                     <p>{st.text}</p>
                   </div>
-                  {i < STEPS.length - 1 ? (
-                    <svg
-                      className={s.stepWave}
-                      viewBox="0 0 100 100"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <path className={s.waveBase} d={STEP_WAVE} />
-                      <path className={s.waveFill} d={STEP_WAVE} />
-                    </svg>
-                  ) : null}
+                  {i < STEPS.length - 1 && (
+                    <div className={s.stepConnector}>
+                      <svg
+                        className={s.stepWave}
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path className={s.waveBase} d={STEP_WAVE} />
+                        <path className={s.waveFill} d={STEP_WAVE} />
+                      </svg>
+                    </div>
+                  )}
                 </li>
               ))}
             </ol>
