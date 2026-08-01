@@ -308,46 +308,54 @@
 .checks li:last-child { border-bottom: 1px solid var(--line); }
 .checks svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 6px; color: var(--t-500); }
 
-/* ── Steps — the road ─────────────────────────────────────────────────────
-   A vertical route with the numbers sitting on it, not four cards in a row.
-   Joining is a sequence, and a line you travel down is what says so.
+/* ── Steps — zigzag road ──────────────────────────────────────────────────
+   Steps alternate left / right around a centre spine. The dot always sits on
+   the spine; the connecting SVG runs from the bottom of one dot to the top of
+   the next, so the line is truly dot-to-dot with no gap or overlap.
 
-   Every offset is derived from `--rail`, so the dot size and the line's
-   position can never drift apart — changing one value at one breakpoint moves
-   the whole road together. */
+   Layout columns: [content-left] [spine] [content-right]
+   --spine is the dot diameter. The spine column is exactly that wide so the
+   dot fills it perfectly and the SVG can be anchored to it. */
 .steps {
   --rail: 56px;
   position: relative;
   z-index: 1;
-  max-width: 720px;
-  margin-inline: auto;
   display: grid;
+  grid-template-columns: 1fr var(--rail) 1fr;
+  row-gap: 0;
 }
 
 .step {
-  position: relative;
+  /* Span all three columns so each row owns the full width. */
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: var(--rail) 1fr;
-  column-gap: 26px;
-  /* Generous, and generous on purpose: the wave needs vertical room to read as
-     a curve. Under about 90px it flattens into a wobble. */
-  padding-bottom: clamp(88px, 9vw, 148px);
+  grid-template-columns: 1fr var(--rail) 1fr;
+  column-gap: 28px;
+  align-items: start;
+  padding-bottom: clamp(72px, 8vw, 128px);
 }
 .step:last-child { padding-bottom: 0; }
 
-/* The road itself. The SVG spans exactly from the bottom of this dot to the top
-   of the next one — `inset-block-end: 0` is the row's padding edge, which is
-   where the following row begins — so segments meet without any of them needing
-   to know its neighbour's height.
+/* Odd steps (1, 3): dot in centre, body on the RIGHT (col 3), left col empty. */
+.step:nth-child(odd) .stepNo  { grid-column: 2; grid-row: 1; }
+.step:nth-child(odd) .stepBody { grid-column: 3; grid-row: 1; }
+.step:nth-child(odd) .stepWave { grid-column: 2; grid-row: 1; }
 
-   `preserveAspectRatio: none` lets one 100×100 path stretch to whatever the row
-   turns out to be; `vector-effect` on the paths keeps the stroke 2px while that
-   happens, which is the whole reason the curve can be written once. */
+/* Even steps (2, 4): dot in centre, body on the LEFT (col 1), right col empty. */
+.step:nth-child(even) .stepNo  { grid-column: 2; grid-row: 1; }
+.step:nth-child(even) .stepBody { grid-column: 1; grid-row: 1; text-align: end; }
+.step:nth-child(even) .stepWave { grid-column: 2; grid-row: 1; }
+
+/* The connecting SVG. Positioned inside the spine column, starting right below
+   the dot and ending at the very bottom of the row's padding — which is exactly
+   where the next row's dot begins. */
 .stepWave {
   position: absolute;
   inset-block-start: calc(var(--rail) + 2px);
   inset-block-end: -2px;
-  inset-inline-start: 0;
+  /* Centre the SVG within the spine column. */
+  left: 50%;
+  transform: translateX(-50%);
   width: var(--rail);
   overflow: visible;
   pointer-events: none;
@@ -362,8 +370,7 @@
 }
 .waveBase { stroke: var(--line); }
 
-/* The teal that fills in as each step arrives. Clipped rather than scaled: a
-   scaled path would squash its own stroke and its dashes along with it. */
+/* Teal fill animates in as each step is revealed. */
 .waveFill {
   stroke: var(--t-500);
   clip-path: inset(0 0 100% 0);
@@ -400,7 +407,7 @@
 
 .stepBody { padding-top: 9px; }
 .stepBody h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.2px; }
-.stepBody p { color: var(--ink-2); font-size: 15px; max-width: 52ch; }
+.stepBody p { color: var(--ink-2); font-size: 15px; max-width: 38ch; }
 
 /* ── Final CTA ────────────────────────────────────────────────────────────── */
 .finalWrap { position: relative; overflow: hidden; text-align: center; }
@@ -521,7 +528,8 @@
   .benefit + .benefit { border-inline-start: 0; border-top: 1px solid var(--line); }
   /* One value moves the dot, the line and the column together. */
   .steps { --rail: 46px; }
-  .step { column-gap: 18px; }
+  .step { column-gap: 12px; }
+  .step:nth-child(even) .stepBody { text-align: end; }
   .stepBody { padding-top: 5px; }
   .stepBody h3 { font-size: 18px; }
   .stats { grid-template-columns: 1fr 1fr; }

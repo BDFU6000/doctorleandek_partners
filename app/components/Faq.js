@@ -1,53 +1,105 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import s from "./Faq.module.css";
 
-/* The old markup was `<details>`, which cannot be animated open: the browser
-   flips `display` and the panel appears instantly. This is the same interaction
-   built from a button and a region so the height can be transitioned.
+/*
+  Network positions for 6 nodes in a web topology.
+  Values are percentages of the container (0–100).
+  Arranged so no two nodes overlap and edges cross naturally like a network.
+*/
+const POSITIONS = [
+  { x: 50, y:  8 },  // 0 — top centre
+  { x: 88, y: 32 },  // 1 — right upper
+  { x: 78, y: 72 },  // 2 — right lower
+  { x: 50, y: 90 },  // 3 — bottom centre
+  { x: 22, y: 72 },  // 4 — left lower
+  { x: 12, y: 32 },  // 5 — left upper
+];
 
-   The animation is `grid-template-rows: 0fr → 1fr`, which is the only way to
-   animate to an unknown content height without measuring it in JS and without
-   the max-height hack, where a guessed maximum makes short answers snap and
-   long ones clip.
-
-   Accessibility is not lost in the swap: the trigger is a real button with
-   `aria-expanded`, the panel is labelled by it, and a closed panel is
-   `hidden`-equivalent via `visibility` so it stays out of the tab order. */
+/* Edges: pairs of node indices that are connected. */
+const EDGES = [
+  [0, 1], [0, 5],
+  [1, 2], [1, 3],
+  [2, 3], [2, 4],
+  [3, 4], [4, 5],
+  [5, 0], [0, 3],
+  [1, 4],
+];
 
 export default function Faq({ items }) {
-  const [open, setOpen] = useState(0);
-  const uid = useId();
+  const [active, setActive] = useState(null);
+  const containerRef = useRef(null);
+  const [size, setSize] = useState({ w: 700, h: 520 });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => {
+      const w = e.contentRect.width;
+      setSize({ w, h: Math.max(420, w * 0.72) });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const { w, h } = size;
+
+  /* Convert percentage positions to pixel coords. */
+  const px = (node) => ({
+    x: (node.x / 100) * w,
+    y: (node.y / 100) * h,
+  });
 
   return (
-    <div className={s.list}>
-      {items.map((f, i) => {
-        const isOpen = open === i;
-        const btnId = `${uid}-q${i}`;
-        const panelId = `${uid}-a${i}`;
+    <div className={s.network} ref={containerRef} style={{ height: h }}>
+      <svg
+        className={s.edges}
+        viewBox={`0 0 ${w} ${h}`}
+        aria-hidden="true"
+        preserveAspectRatio="none"
+      >
+        {EDGES.map(([a, b], i) => {
+          const pa = px(POSITIONS[a]);
+          const pb = px(POSITIONS[b]);
+          const isLit = active === a || active === b;
+          return (
+            <line
+              key={i}
+              x1={pa.x} y1={pa.y}
+              x2={pb.x} y2={pb.y}
+              className={`${s.edge} ${isLit ? s.edgeLit : ""}`}
+            />
+          );
+        })}
+      </svg>
+
+      {items.slice(0, 6).map((f, i) => {
+        const pos = POSITIONS[i];
+        const isActive = active === i;
         return (
-          <div key={f.q} className={s.item} data-open={isOpen ? "" : undefined} data-reveal="" style={{ "--i": i }}>
-            <h3 className={s.head}>
-              <button
-                type="button"
-                id={btnId}
-                className={s.trigger}
-                aria-expanded={isOpen}
-                aria-controls={panelId}
-                onClick={() => setOpen(isOpen ? -1 : i)}
-              >
-                <span>{f.q}</span>
-                <span className={s.sign} aria-hidden="true">
-                  <i />
-                  <i />
-                </span>
-              </button>
-            </h3>
-            <div id={panelId} role="region" aria-labelledby={btnId} className={s.panel}>
-              <div className={s.panelInner}>
-                <p>{f.a}</p>
-              </div>
+          <div
+            key={f.q}
+            className={`${s.node} ${isActive ? s.nodeActive : ""}`}
+            style={{ "--nx": `${pos.x}%`, "--ny": `${pos.y}%` }}
+            data-reveal=""
+            style={{
+              "--nx": `${pos.x}%`,
+              "--ny": `${pos.y}%`,
+              "--i": i,
+            }}
+          >
+            <button
+              type="button"
+              className={s.nodeDot}
+              aria-expanded={isActive}
+              onClick={() => setActive(isActive ? null : i)}
+            >
+              <span className={s.nodeNum}>{String(i + 1).padStart(2, "0")}</span>
+            </button>
+            <div className={`${s.nodeCard} ${isActive ? s.nodeCardOpen : ""}`}>
+              <p className={s.nodeQ}>{f.q}</p>
+              <p className={s.nodeA}>{f.a}</p>
             </div>
           </div>
         );

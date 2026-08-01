@@ -448,10 +448,12 @@ export default function PartnersPage() {
                 you as each step scrolls into view. */}
             <ol className={s.steps}>
               {STEPS.map((st, i) => (
-                <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i }}>
+                <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i, position: "relative" }}>
                   <span className={s.stepNo}>{i + 1}</span>
-                  {/* No segment after the last dot: a road that carries on past
-                      the final step points somewhere the page does not go. */}
+                  <div className={s.stepBody}>
+                    <h3>{st.title}</h3>
+                    <p>{st.text}</p>
+                  </div>
                   {i < STEPS.length - 1 ? (
                     <svg
                       className={s.stepWave}
@@ -463,10 +465,6 @@ export default function PartnersPage() {
                       <path className={s.waveFill} d={STEP_WAVE} />
                     </svg>
                   ) : null}
-                  <div className={s.stepBody}>
-                    <h3>{st.title}</h3>
-                    <p>{st.text}</p>
-                  </div>
                 </li>
               ))}
             </ol>
