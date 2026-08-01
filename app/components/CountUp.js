@@ -4,17 +4,17 @@ import { useEffect, useRef, useState } from "react";
 
 /* Counts a stat up when it first scrolls into view.
 
-   Two details that matter for an Arabic page:
+   Two details worth keeping:
 
-   1. The digits render as Arabic-Indic (٠..٩) to match the hand-set numerals
-      already on the page. Rather than convert per frame, the component holds a
-      number in state and formats with `ar-EG`, which is what Intl is for.
+   1. Latin digits, matching the index numerals everywhere else on the page.
+      Libya and the Maghreb generally set Latin numerals in Arabic text; the
+      point is that the page picks one set and holds to it.
    2. The final value is in the server-rendered HTML, not zero. A crawler, a
       reader with JS off, and the moment before hydration all show the real
       number — the animation only ever replaces a correct value with the same
       correct value.  */
 
-const fmt = new Intl.NumberFormat("ar-EG", { useGrouping: false });
+const fmt = new Intl.NumberFormat("en-US", { useGrouping: false });
 
 export default function CountUp({ to, suffix = "", duration = 1100 }) {
   const [value, setValue] = useState(to);

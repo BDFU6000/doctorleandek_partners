@@ -58,6 +58,21 @@ minimum for a web body; the sheet's 14px survives as `.bodySm`.
 ascenders carry hamza and madda and its descenders carry ج ح خ ع; a line-height that reads as
 tight-and-modern in Latin collides them in Arabic.
 
+**Numerals are Latin (0-9), not Arabic-Indic (٠-٩).** Both are correct Arabic typography — Libya and
+the Maghreb generally set Latin numerals ("الأرقام الغبارية"), the Mashriq sets ٠١٢. The page picks
+one set and holds it: section indices, role indices, step numbers and the animated counters all
+agree. `CountUp` formats with `en-US` for the same reason.
+
+## Direction
+
+`app/globals.css` sets `direction: rtl` on `html` **and** `body`, on top of `<html dir="rtl">`.
+That is not redundant, and it must not be removed. The `dir` attribute is only a presentational
+hint — browsers apply it through a UA rule, `[dir="rtl"]{direction:rtl}` — and an author rule beats
+a UA rule. So the CSS keeps the layout RTL even when something rewrites the attribute after load: a
+translation or reader extension, a proxy, a paste into another shell. Without it, one rewritten
+attribute flips every column and every `text-align` on the page to the left, which is exactly the
+bug that was reported. This site is Arabic-only; there is no case where it should read LTR.
+
 ## Layout language
 
 Taken from the editorial kits in `website Stlyes brainstorming/UI kits`:
@@ -67,7 +82,10 @@ Taken from the editorial kits in `website Stlyes brainstorming/UI kits`:
 - **Hairlines do the dividing.** The roles grid is a real table — the container owns the border and
   1px gaps show `--line` through. The 6-column track with spans of 2 and 3 fills exactly, which is
   why five cards never leave a hole.
-- **Index numerals on everything countable** (`٠١`…), Arabic-Indic throughout.
+- **Index numerals on everything countable** (`01`…), Latin throughout.
+- **The joining steps are a vertical road**, not four cards in a row: a dashed line running down
+  through the numbers, with the teal filling in behind you as each step scrolls into view. Every
+  offset derives from `--rail`, so the dot size and the line position cannot drift apart.
 - **One accent.** `--t-500` carries every call to action and every active state.
 - **Elevation is a top-edge highlight, not a shadow** (`--edge`), which is the neumorphism
   reference translated to a dark canvas: on dark, an inner light line reads as raised and a drop
@@ -168,20 +186,47 @@ same `#0C1B21` background.
 
 | File | Where | What it argues |
 |---|---|---|
-| `hero-emblem.webp` | hero | the brand mark itself, in glass — the page's one focal object |
+| `hero-doctor.webp` | hero | the app's own logo figure in 3D — the page's one focal object |
 | `request-flow.webp` | "الطلب يصل إليك جاهزًا" | a phone with request cards arriving in front of it |
 | `trust-shield.webp` | "موثوقة من الطرفين" | a shield with a lock inside it |
-| `og.jpg` | social card | composited from the emblem by a one-off sharp script |
+| `red-crescent.webp` | final CTA | the Red Crescent, closing the page |
+| `og.jpg` | social card | composited from the hero figure by a one-off sharp script |
+
+`hero-doctor.webp` is generated **from** `doctorleandek_02/assets/Logo.png` — the doctor in the
+logo, same pose, same outfit, same blank face, rebuilt as a glossy figurine in the render family.
+The Arabic wordmark beside him in the logo is deliberately **not** baked in: it stays live Cairo
+text in the header, where it is crisp, selectable and translatable.
 
 **Each render is placed where it makes the section's point.** None is decoration, and there are no
-spare ones. If a fourth section needs art, it needs a reason first.
+spare ones. If a fifth section needs art, it needs a reason first.
 
-Two rules carried over from the sheet, because they are easy to violate by accident:
+### The medical symbol is the crescent, never the cross
+
+The audience is Libyan and Muslim, and the Latin cross is the wrong emblem for them — the Red
+Crescent is the Red Cross movement's own symbol for exactly this reason. Every cross on this site
+was replaced:
+
+| Was | Now |
+|---|---|
+| hero cross emblem render | `hero-doctor.webp` |
+| OG card, two-bar plus mark | crescent, drawn as two circles with `fill-rule="evenodd"` |
+| header brand mark, two `<i>` bars | `IconCrescentSolid` |
+| `IconCross` on the hero badge | `IconCrescent` |
+| plus inside `IconPharmacy`'s bag | scaled `CRESCENT_PATH` |
+| plus on `IconAmbulance`'s van | scaled `CRESCENT_PATH` |
+| `crossPrism()` WebGL satellite | `crescentPrism()` |
+
+`CRESCENT_PATH` in `app/icons.js` is the single source for the 2D shape; icons scale it with a
+transform rather than redrawing it. `crescentPrism()` in `app/lib/gl-geometry.js` is the 3D one.
+**Do not reintroduce a cross anywhere**, including in a new icon.
+
+Two more rules, easy to violate by accident:
 
 1. **Icons are inline SVG, never emoji.** Emoji carry their own fixed colours — a red ambulance, a
    pink wallet — which break a single-hue palette, and every OS draws them differently. The icons in
    `app/icons.js` inherit `currentColor`.
-2. **Emergency red is a signal.** `--danger` appears on the ambulance role and nowhere else.
+2. **Emergency red is a signal.** `--danger` appears on the ambulance role and on the closing Red
+   Crescent, and nowhere else.
 
 ### On the sheet's "No 3D"
 
@@ -189,9 +234,9 @@ The sheet's guidelines block says *"Follow the logo's illustration style. No car
 childish drawings."* That line governed the **flat line-art illustration family the app ships** —
 it was there to stop someone dropping a rendered cartoon doctor next to the onboarding art.
 
-This site is now a different surface with its own object language, and the renders are abstract
-brand objects, not illustrated scenes: no people, no places, no narrative. Nothing here competes
-with the app's set, because nothing here is in it.
+This site is a different surface with its own object language. The hero figure is the logo's own
+doctor rendered as a smooth ceramic figurine, not a cartoon and not a photoreal person, and the
+rest are abstract objects: no places, no narrative, no second illustration family.
 
 ## Where else this system lives
 

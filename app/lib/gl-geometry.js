@@ -6,9 +6,9 @@
 // non-indexed lets a builder pick flat or smooth normals per shape, which is
 // the whole visual difference between "faceted crystal" and "soft capsule".
 //
-// The shapes are not arbitrary. The cross is the brand mark, the capsule reads
-// as pharmacy, the ring as the delivery loop, the crystal is the neutral filler
-// that keeps the cluster from looking like a literal icon soup.
+// The shapes are not arbitrary. The crescent is the medical mark, the capsule
+// reads as pharmacy, the ring as the delivery loop, the crystal is the neutral
+// filler that keeps the set from looking like a literal icon soup.
 
 /** Flat per-face normals from a flat [x,y,z, x,y,z, ...] triangle list. */
 function flatNormals(pos) {
@@ -137,39 +137,84 @@ export function torus(R = 0.75, r = 0.24, seg = 44, sides = 18) {
   return mesh(pos, nor);
 }
 
-/* ── Extruded medical cross ────────────────────────────────────────────────
-   The brand mark given depth. The caps are triangulated as five disjoint
-   quads (centre plus four arms) rather than two overlapping bars, because two
-   coplanar overlapping quads z-fight in the middle of the shape — exactly
-   where the eye is. */
-export function crossPrism(arm = 0.85, w = 0.3, depth = 0.26) {
-  const L = arm, d = depth;
-  const outline = [
-    [L, -w], [L, w], [w, w], [w, L], [-w, L], [-w, w],
-    [-L, w], [-L, -w], [-w, -w], [-w, -L], [w, -L], [w, -w],
-  ];
-  const quads = [
-    [[-w, -w], [w, -w], [w, w], [-w, w]],   // centre
-    [[w, -w], [L, -w], [L, w], [w, w]],     // +x arm
-    [[-L, -w], [-w, -w], [-w, w], [-L, w]], // -x arm
-    [[-w, w], [w, w], [w, L], [-w, L]],     // +y arm
-    [[-w, -L], [w, -L], [w, -w], [-w, -w]], // -y arm
-  ];
+/* ── Extruded crescent ─────────────────────────────────────────────────────
+   The medical mark, given depth. This replaced an extruded cross: the audience
+   is Libyan and Muslim, and the crescent — the Red Crescent's own emblem — is
+   the right symbol for them. There is no cross anywhere in this file.
+
+   A crescent is a lune: the part of one circle left over after a second,
+   offset circle is removed. Rather than boolean two circles, both boundary
+   arcs are sampled with the same number of points and stitched into a triangle
+   strip, which fills the shape without needing a general polygon triangulator
+   and cannot produce the sliver triangles an ear-clipper would leave at the
+   horns.
+
+   `bite` is how far the inner circle is pushed toward the upper right, so the
+   horns open that way — matching the orientation of the red crescent render. */
+export function crescentPrism(R = 0.95, r = 0.82, bite = 0.44, depth = 0.24, seg = 40) {
+  const C2 = [bite * 0.82, bite * 0.58];
+  const d = Math.hypot(C2[0], C2[1]);
+
+  // Circle intersection. `a` is the distance from C1 along the centre line to
+  // the radical line; `h` is the half-chord.
+  const a = (d * d - r * r + R * R) / (2 * d);
+  const h = Math.sqrt(Math.max(0, R * R - a * a));
+  const ux = C2[0] / d, uy = C2[1] / d;
+  const px = a * ux, py = a * uy;
+  const A = [px + h * uy, py - h * ux];
+  const B = [px - h * uy, py + h * ux];
+
+  // For each circle, pick the arc that actually bounds the crescent: on the
+  // outer circle that is the arc pointing away from C2, on the inner circle the
+  // one that falls inside C1. Choosing by testing the midpoint is shorter than
+  // reasoning about angle ranges, and it cannot get the case backwards.
+  const arc = (c, rad, from, to, keep) => {
+    let a0 = Math.atan2(from[1] - c[1], from[0] - c[0]);
+    let a1 = Math.atan2(to[1] - c[1], to[0] - c[0]);
+    let delta = a1 - a0;
+    while (delta <= -Math.PI) delta += Math.PI * 2;
+    while (delta > Math.PI) delta -= Math.PI * 2;
+    const mid = (t) => [c[0] + rad * Math.cos(a0 + t), c[1] + rad * Math.sin(a0 + t)];
+    if (!keep(mid(delta / 2))) delta += delta > 0 ? -Math.PI * 2 : Math.PI * 2;
+    const out = [];
+    for (let i = 0; i < seg; i++) out.push(mid((delta * i) / (seg - 1)));
+    return out;
+  };
+
+  const outer = arc([0, 0], R, A, B, (p) => Math.hypot(p[0] - C2[0], p[1] - C2[1]) > r);
+  const inner = arc(C2, r, A, B, (p) => Math.hypot(p[0], p[1]) < R);
+
+  // Signed area of the closed outline decides the winding, so front faces end
+  // up pointing at +z whichever way the arcs happened to run.
+  const ring = [...outer, ...inner.slice().reverse()];
+  let area = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i], q = ring[(i + 1) % ring.length];
+    area += p[0] * q[1] - q[0] * p[1];
+  }
+  const flip = area < 0;
 
   const pos = [];
-  const tri = (a, b, c) => pos.push(a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]);
+  const tri = (p, q, s) => {
+    if (flip) [q, s] = [s, q];
+    pos.push(p[0], p[1], p[2], q[0], q[1], q[2], s[0], s[1], s[2]);
+  };
+  const at = (p, z) => [p[0], p[1], z];
 
-  for (const q of quads) {
-    const f = q.map(([x, y]) => [x, y, d]);
-    tri(f[0], f[1], f[2]); tri(f[0], f[2], f[3]);
-    const b = q.map(([x, y]) => [x, y, -d]).reverse(); // reversed to face -z
-    tri(b[0], b[1], b[2]); tri(b[0], b[2], b[3]);
+  for (let i = 0; i < seg - 1; i++) {
+    const o0 = outer[i], o1 = outer[i + 1], i0 = inner[i], i1 = inner[i + 1];
+    // Front cap (+z), then the back cap with its winding reversed.
+    tri(at(o0, depth), at(o1, depth), at(i1, depth));
+    tri(at(o0, depth), at(i1, depth), at(i0, depth));
+    tri(at(i1, -depth), at(o1, -depth), at(o0, -depth));
+    tri(at(i0, -depth), at(i1, -depth), at(o0, -depth));
   }
-  for (let i = 0; i < outline.length; i++) {
-    const [x1, y1] = outline[i];
-    const [x2, y2] = outline[(i + 1) % outline.length];
-    const a = [x1, y1, d], b = [x2, y2, d], c = [x2, y2, -d], e = [x1, y1, -d];
-    tri(a, e, c); tri(a, c, b);
+
+  for (let i = 0; i < ring.length; i++) {
+    const p = ring[i], q = ring[(i + 1) % ring.length];
+    tri(at(p, depth), at(p, -depth), at(q, -depth));
+    tri(at(p, depth), at(q, -depth), at(q, depth));
   }
+
   return mesh(pos); // flat normals — a prism has no smooth surfaces
 }

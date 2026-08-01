@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { SITE } from "../site-config";
+import { IconCrescentSolid } from "../icons";
 import s from "./SiteNav.module.css";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -73,9 +74,9 @@ export default function SiteNav() {
       <header className={s.bar} data-stuck={stuck ? "" : undefined}>
         <div className={`wrap ${s.inner}`}>
           <a className={s.brand} href="#top">
+            {/* The mark was two bars forming a plus. It is a crescent now. */}
             <span className={s.mark} aria-hidden="true">
-              <i />
-              <i />
+              <IconCrescentSolid />
             </span>
             <span className={s.brandText}>
               <span className={s.brandName}>دكتور لعندك</span>

@@ -17,13 +17,14 @@ import {
   IconScooter,
   IconAmbulance,
   IconCheck,
-  IconCross,
+  IconCrescent,
 } from "./icons";
 
-// Arabic-Indic numerals everywhere something is counted. Latin digits in one
-// list and ٠١ in the next reads as an oversight, which on an Arabic page it is.
-const ar = new Intl.NumberFormat("ar-EG", { useGrouping: false });
-const idx = (n) => ar.format(n).padStart(2, "٠");
+// Latin digits, not Arabic-Indic. Both are correct Arabic typography — Libya
+// and the Maghreb generally set Latin numerals ("الأرقام الغبارية"), while the
+// Mashriq sets ٠١٢. The whole page uses one set, so the index numerals, the
+// step numbers and the counters all agree.
+const idx = (n) => String(n).padStart(2, "0");
 
 // The five partner roles are the ones that actually exist in the app's UserType
 // enum (lib/core/constants/enums.dart): medicalStaff, pharmacyAdmin,
@@ -226,7 +227,7 @@ export default function PartnersPage() {
                   </div>
                   <div className={s.stat}>
                     <b>
-                      <CountUp to={24} suffix="/٧" />
+                      <CountUp to={24} suffix="/7" />
                     </b>
                     <span>طلبات الطوارئ</span>
                   </div>
@@ -245,16 +246,16 @@ export default function PartnersPage() {
                 <div className={s.heroEmblem}>
                   <span className={s.heroGlow} aria-hidden="true" />
                   <Image
-                    src="/render/hero-emblem.webp"
-                    alt="شعار دكتور لعندك مجسّمًا: صليب طبي زجاجي بلون فيروزي يحيط به خاتم معدني"
+                    src="/render/hero-doctor.webp"
+                    alt="طبيب دكتور لعندك مجسّمًا بأسلوب ثلاثي الأبعاد، يحمل لوحًا طبيًا ويحيط به خاتم معدني"
                     width={928}
-                    height={810}
+                    height={1152}
                     priority
-                    sizes="(max-width: 900px) 78vw, 46vw"
+                    sizes="(max-width: 900px) 66vw, 38vw"
                   />
                   <OrbitScene />
                   <div className={s.heroBadge}>
-                    <IconCross /> حسابك يبدأ خلال دقائق
+                    <IconCrescent /> حسابك يبدأ خلال دقائق
                   </div>
                 </div>
               </Parallax>
@@ -423,16 +424,24 @@ export default function PartnersPage() {
               <Label no={5} mid>
                 خطوات الانضمام
               </Label>
+              {/* Non-breaking space: "أول طلب" is one idea and was breaking
+                  across two lines, leaving "طلب" alone as a widow. */}
               <h2 className="sectionTitle" data-reveal="">
-                أربع خطوات حتى أول طلب
+                {"أربع خطوات حتى أول طلب"}
               </h2>
             </div>
+            {/* A vertical road rather than four boxes in a row: the steps are a
+                journey with an order, and a line you travel down says that in a
+                way four side-by-side cards never did. The teal fills in behind
+                you as each step scrolls into view. */}
             <ol className={s.steps}>
               {STEPS.map((st, i) => (
                 <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i }}>
-                  <div className={s.stepNo}>{ar.format(i + 1)}</div>
-                  <h3>{st.title}</h3>
-                  <p>{st.text}</p>
+                  <span className={s.stepNo}>{i + 1}</span>
+                  <div className={s.stepBody}>
+                    <h3>{st.title}</h3>
+                    <p>{st.text}</p>
+                  </div>
                 </li>
               ))}
             </ol>
@@ -456,14 +465,28 @@ export default function PartnersPage() {
         <section className={`${s.bandB} ${s.finalWrap} section`}>
           <div className="aurora" aria-hidden="true" />
           <div className="wrap">
-            <h2 className="sectionTitle" data-reveal="">
+            {/* The Red Crescent, closing the page. It is the emblem the Red
+                Cross movement itself uses across the Muslim world, so it is the
+                correct medical mark for a Libyan audience — and it is the one
+                place on the page where --danger is allowed to be large. */}
+            <Parallax className={s.finalMark} speed={0.06} data-reveal="scale">
+              <span className={s.finalGlow} aria-hidden="true" />
+              <Image
+                src="/render/red-crescent.webp"
+                alt="الهلال الأحمر مجسّمًا، رمز الخدمات الطبية والطوارئ"
+                width={1024}
+                height={1024}
+                sizes="(max-width: 900px) 46vw, 260px"
+              />
+            </Parallax>
+            <h2 className="sectionTitle" data-reveal="" style={{ "--i": 1 }}>
               جاهز للانضمام؟
             </h2>
-            <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+            <p className="bodyLarge" data-reveal="" style={{ "--i": 2 }}>
               أنشئ حسابك واختر نوعه، وأرسل بياناتك للمراجعة. الطلبات تبدأ
               بالوصول فور تفعيل الحساب.
             </p>
-            <div className={s.finalCtas} data-reveal="" style={{ "--i": 2 }}>
+            <div className={s.finalCtas} data-reveal="" style={{ "--i": 3 }}>
               <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
                 سجّل الآن
               </MagneticLink>

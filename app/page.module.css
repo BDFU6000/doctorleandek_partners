@@ -88,9 +88,12 @@
   display: flex;
   justify-content: center;
 }
+/* Narrower than the old square emblem: the doctor render is 4:5 portrait, so
+   the same width would make the hero a great deal taller than the copy beside
+   it. */
 .heroEmblem {
   position: relative;
-  width: min(100%, 560px);
+  width: min(100%, 420px);
   animation: float 8s ease-in-out infinite;
 }
 @keyframes float {
@@ -305,28 +308,65 @@
 .checks li:last-child { border-bottom: 1px solid var(--line); }
 .checks svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 6px; color: var(--t-500); }
 
-/* ── Steps ────────────────────────────────────────────────────────────────
-   A timeline, not four cards. One hairline runs through every numeral, which
-   is the thing that makes four boxes read as a sequence. */
+/* ── Steps — the road ─────────────────────────────────────────────────────
+   A vertical route with the numbers sitting on it, not four cards in a row.
+   Joining is a sequence, and a line you travel down is what says so.
+
+   Every offset is derived from `--rail`, so the dot size and the line's
+   position can never drift apart — changing one value at one breakpoint moves
+   the whole road together. */
 .steps {
+  --rail: 56px;
   position: relative;
   z-index: 1;
+  max-width: 720px;
+  margin-inline: auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(20px, 3vw, 40px);
 }
-.steps::before {
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  column-gap: 26px;
+  padding-bottom: clamp(34px, 4vw, 54px);
+}
+.step:last-child { padding-bottom: 0; }
+
+/* Two dashed lines stacked: the unpaved base, and the teal that fills in.
+   `inset-block-end: 0` lands exactly on the next row's dot, so the road is
+   continuous without any segment needing to know its neighbour's height. */
+.step::before,
+.step::after {
   content: "";
   position: absolute;
-  inset-block-start: 26px;
-  inset-inline: 8%;
-  height: 1px;
-  background: var(--line);
+  inset-block-start: calc(var(--rail) + 4px);
+  inset-block-end: 0;
+  inset-inline-start: calc(var(--rail) / 2 - 1px);
+  width: 2px;
+  border-radius: 2px;
 }
-.step { position: relative; }
+.step::before {
+  background: repeating-linear-gradient(180deg, var(--line) 0 9px, transparent 9px 18px);
+}
+.step::after {
+  background: repeating-linear-gradient(180deg, var(--t-500) 0 9px, transparent 9px 18px);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 75ms + 260ms);
+}
+.step[data-revealed]::after { transform: scaleY(1); }
+/* The last step ends the road; a segment hanging off the bottom reads as a
+   route that goes somewhere the page does not. */
+.step:last-child::before,
+.step:last-child::after { display: none; }
+
 .stepNo {
-  width: 52px;
-  height: 52px;
+  position: relative;
+  z-index: 1;
+  width: var(--rail);
+  height: var(--rail);
   border-radius: 50%;
   background: var(--t-900);
   border: 1px solid var(--line-hi);
@@ -334,25 +374,55 @@
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 17px;
-  color: var(--t-200);
-  margin-bottom: 24px;
+  font-size: 18px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
   transition: background var(--e-slow), color var(--e-slow), border-color var(--e-slow),
     box-shadow var(--e-slow);
 }
+.step[data-revealed] .stepNo { border-color: var(--t-500); color: var(--t-100); }
 .step:hover .stepNo {
   background: var(--t-500);
   border-color: var(--t-500);
   color: var(--t-950);
   box-shadow: var(--shadow-glow);
 }
-.step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-.step p { color: var(--ink-2); font-size: 14.5px; }
+
+.stepBody { padding-top: 9px; }
+.stepBody h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.2px; }
+.stepBody p { color: var(--ink-2); font-size: 15px; max-width: 52ch; }
 
 /* ── Final CTA ────────────────────────────────────────────────────────────── */
 .finalWrap { position: relative; overflow: hidden; text-align: center; }
 .finalWrap > div { position: relative; z-index: 1; }
 .finalWrap h2 { max-width: 20ch; margin-inline: auto; }
+
+/* The Red Crescent, closing the page. Deliberately smaller than the hero
+   figure — it is a sign-off, not a second hero. */
+.finalMark {
+  position: relative;
+  width: min(46vw, 240px);
+  margin: 0 auto 28px;
+}
+.finalMark img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 50%,
+    #000 54%, rgba(0, 0, 0, 0.6) 78%, transparent 100%);
+  mask-image: radial-gradient(ellipse closest-side at 50% 50%,
+    #000 54%, rgba(0, 0, 0, 0.6) 78%, transparent 100%);
+}
+/* The one red glow on the page, and it belongs to the one red object. */
+.finalGlow {
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(199, 25, 28, 0.34), transparent 66%);
+  filter: blur(52px);
+  z-index: 0;
+}
 .finalWrap p { max-width: 52ch; margin: 20px auto 34px; }
 .finalCtas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
@@ -416,8 +486,6 @@
   .benefits { grid-template-columns: repeat(2, 1fr); }
   .benefit:nth-child(3) { border-inline-start: 0; }
   .benefit:nth-child(n + 3) { border-top: 1px solid var(--line); }
-  .steps { grid-template-columns: repeat(2, 1fr); row-gap: 44px; }
-  .steps::before { display: none; }
 }
 
 @media (max-width: 900px) {
@@ -441,7 +509,11 @@
   .role, .role:last-child, .role:nth-child(4), .role:nth-child(5) { grid-column: span 1; }
   .benefits { grid-template-columns: 1fr; }
   .benefit + .benefit { border-inline-start: 0; border-top: 1px solid var(--line); }
-  .steps { grid-template-columns: 1fr; row-gap: 32px; }
+  /* One value moves the dot, the line and the column together. */
+  .steps { --rail: 46px; }
+  .step { column-gap: 18px; }
+  .stepBody { padding-top: 5px; }
+  .stepBody h3 { font-size: 18px; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat:nth-child(3) { grid-column: span 2; border-inline-start: 0; border-top: 1px solid var(--line); }
 }

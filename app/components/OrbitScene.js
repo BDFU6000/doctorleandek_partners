@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { mat4, perspective, multiply, compose, normalMat3, hex } from "../lib/gl-math";
-import { icosahedron, capsule, torus, crossPrism } from "../lib/gl-geometry";
+import { icosahedron, capsule, torus, crescentPrism } from "../lib/gl-geometry";
 import s from "./OrbitScene.module.css";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -126,11 +126,11 @@ function buffer(gl, data) {
 }
 
 /* One satellite per partner account type, in the order the page introduces
-   them. The shape is the role: stethoscope→crystal is a stretch, but capsule
-   is the pharmacy, the ring is the delivery loop, and the cross is care
-   itself. Phases are evenly spaced so the five never bunch up. */
+   them. The shape is the role: crystal for medical staff is a stretch, but the
+   capsule is the pharmacy, the ring is the delivery loop, and the crescent is
+   care itself. Phases are evenly spaced so the five never bunch up. */
 const SATELLITES = [
-  { g: "cross",   phase: 0.0,  size: 0.33, spin: [0.34, 0.21], lit: "--t-100", shade: "--t-600" },
+  { g: "crescent", phase: 0.0, size: 0.36, spin: [0.34, 0.21], lit: "--t-100", shade: "--t-600" },
   { g: "capsule", phase: 1.26, size: 0.30, spin: [0.28, 0.30], lit: "--t-50",  shade: "--t-500" },
   { g: "crystal", phase: 2.51, size: 0.32, spin: [0.22, 0.26], lit: "--t-200", shade: "--t-600" },
   { g: "sphere",  phase: 3.77, size: 0.27, spin: [0.18, 0.18], lit: "--t-100", shade: "--t-500" },
@@ -188,7 +188,7 @@ export default function OrbitScene() {
     const dustColor = token("--t-400");
 
     const geos = {
-      cross: crossPrism(0.85, 0.3, 0.26),
+      crescent: crescentPrism(0.95, 0.82, 0.44, 0.22, 40),
       capsule: capsule(0.44, 1.0, 24, 8),
       crystal: icosahedron(0, false),
       sphere: icosahedron(2, true),

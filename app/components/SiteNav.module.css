@@ -36,28 +36,22 @@
 .brand { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
 
 .mark {
-  position: relative;
   width: 34px;
   height: 34px;
   border-radius: var(--r-sm);
   background: var(--t-500);
   box-shadow: var(--shadow-glow);
   flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t-950);
   transition: transform var(--e-slow), background var(--e-slow);
 }
-/* Physical `left`/`top`: `inset-inline-start` resolves to `right` in RTL, and
-   pairing that with a physical translate lands the bar a half-width off centre. */
-.mark i {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  background: var(--t-950);
-  border-radius: 2px;
-  translate: -50% -50%;
-}
-.mark i:first-child { width: 15px; height: 4px; }
-.mark i:last-child { width: 4px; height: 15px; }
-.brand:hover .mark { transform: rotate(90deg) scale(1.06); background: var(--t-400); }
+.mark svg { width: 19px; height: 19px; display: block; }
+/* A small turn, not the old 90° flip: a crescent rotated a quarter turn reads
+   as a crescent lying on its back, which looks like a mistake. */
+.brand:hover .mark { transform: rotate(-18deg) scale(1.07); background: var(--t-400); }
 
 .brandText { display: flex; flex-direction: column; line-height: 1.25; }
 .brandName { font-size: 17px; font-weight: 800; letter-spacing: 0.2px; }
@@ -144,6 +138,7 @@
   inset: 0;
   z-index: 55;
   background: rgba(6, 15, 19, 0.66);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   opacity: 0;
   visibility: hidden;
