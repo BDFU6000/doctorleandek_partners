@@ -1,0 +1,34 @@
+/* The canvas is exactly the emblem's box and sits ON TOP of it, so satellites
+   on the near half of the orbit pass in front of the mark. The far half is
+   faded out in the shader, which is what sells the ones that pass behind. */
+
+.host {
+  position: absolute;
+  /* Just enough overhang for a satellite to clear the emblem's edge, and no
+     more — a wider box lets one wander into the column beside it. */
+  inset: -7%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+/* Added on the frame after the first draw, so the orbit arrives rather than
+   pops. If WebGL never came up the class is never added and nothing shows. */
+.ready {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    transition: none;
+  }
+}

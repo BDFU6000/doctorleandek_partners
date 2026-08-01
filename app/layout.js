@@ -24,28 +24,43 @@ export const metadata = {
     title: "انضم إلى شبكة دكتور لعندك",
     description:
       "استقبل طلبات الزيارات المنزلية والأدوية والطوارئ، وأدر عملك من لوحة تحكم واحدة.",
-    images: [{ url: "/img/og.jpg", width: 1200, height: 630 }],
+    images: [{ url: "/render/og.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "انضم إلى شبكة دكتور لعندك",
     description:
       "استقبل طلبات الزيارات المنزلية والأدوية والطوارئ، وأدر عملك من لوحة تحكم واحدة.",
-    images: ["/img/og.jpg"],
+    images: ["/render/og.jpg"],
   },
   robots: { index: true, follow: true },
 };
 
 // Split from `metadata`: themeColor there has been deprecated since Next 14.
 export const viewport = {
-  themeColor: "#122331",
+  // --t-900, the canvas. Same value the hero renders were generated on, so the
+  // browser chrome, the page and the artwork are all one colour.
+  themeColor: "#0C1B21",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl" className={cairo.className}>
+    // `data-scroll-behavior` is required from Next 16 on: the router stopped
+    // overriding a global `scroll-behavior: smooth` during navigation, and
+    // without this attribute an in-app navigation would smooth-scroll to the
+    // top instead of arriving there.
+    <html lang="ar" dir="rtl" className={cairo.className} data-scroll-behavior="smooth">
+      <head>
+        {/* The scroll-reveal system starts every animated element at zero
+            opacity, which is correct only if the script that reveals them can
+            run. Without JavaScript there is no observer and the page would be
+            blank, so this hands the content straight back. */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
+        </noscript>
+      </head>
       <body>{children}</body>
     </html>
   );

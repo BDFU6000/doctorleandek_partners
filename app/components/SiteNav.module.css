@@ -1,0 +1,220 @@
+/* Retinted onto the single-hue ramp. Nothing here declares a hex. */
+
+.bar {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 60;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  /* Transparent over the hero, glass once you leave it. Both the background
+     and the rule animate, so the bar materialises instead of blinking on. */
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background var(--e-slow), border-color var(--e-slow), backdrop-filter var(--e-slow);
+}
+.bar[data-stuck] {
+  background: rgba(6, 15, 19, 0.76);
+  border-bottom-color: var(--line);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ── Brand ────────────────────────────────────────────────────────────────
+   The mark is the brand cross built from two bars rather than an icon file, so
+   it inherits the ramp and costs no request. It turns on hover, the smallest
+   possible nod to the orbit in the hero. */
+.brand { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
+
+.mark {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  background: var(--t-500);
+  box-shadow: var(--shadow-glow);
+  flex: 0 0 auto;
+  transition: transform var(--e-slow), background var(--e-slow);
+}
+/* Physical `left`/`top`: `inset-inline-start` resolves to `right` in RTL, and
+   pairing that with a physical translate lands the bar a half-width off centre. */
+.mark i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: var(--t-950);
+  border-radius: 2px;
+  translate: -50% -50%;
+}
+.mark i:first-child { width: 15px; height: 4px; }
+.mark i:last-child { width: 4px; height: 15px; }
+.brand:hover .mark { transform: rotate(90deg) scale(1.06); background: var(--t-400); }
+
+.brandText { display: flex; flex-direction: column; line-height: 1.25; }
+.brandName { font-size: 17px; font-weight: 800; letter-spacing: 0.2px; }
+.brandTag { font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--ink-3); }
+
+/* ── Links ────────────────────────────────────────────────────────────────── */
+.links { display: flex; align-items: center; gap: 4px; }
+
+.link {
+  position: relative;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  transition: color var(--e-fast), background var(--e-fast);
+}
+.link:hover { color: var(--ink); background: var(--surface-hi); }
+
+/* The current-section marker grows from the centre rather than fading, so the
+   eye can follow it moving between links as you scroll. */
+.link::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--t-500);
+  transform: scaleX(0);
+  transition: transform var(--e-slow);
+}
+.link[data-active] { color: var(--ink); }
+.link[data-active]::after { transform: scaleX(1); }
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+.actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+
+.ghostCta,
+.solidCta {
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 10px 18px;
+  white-space: nowrap;
+  transition: transform var(--e-fast), background var(--e-fast), color var(--e-fast),
+    border-color var(--e-fast), box-shadow var(--e-fast);
+}
+.ghostCta { border: 1px solid var(--line-hi); color: var(--ink-2); }
+.ghostCta:hover { border-color: var(--t-400); color: var(--ink); background: var(--surface-hi); }
+.solidCta { background: var(--t-500); color: var(--t-950); }
+.solidCta:hover { transform: translateY(-2px); background: var(--t-400); box-shadow: var(--shadow-glow); }
+
+/* ── Burger ───────────────────────────────────────────────────────────────── */
+.burger {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-hi);
+  background: var(--surface);
+  cursor: pointer;
+  position: relative;
+}
+.burger span {
+  position: absolute;
+  left: 11px;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition: transform var(--e-slow), opacity var(--e-fast);
+}
+.burger span:nth-child(1) { inset-block-start: 14px; }
+.burger span:nth-child(2) { inset-block-start: 20px; }
+.burger span:nth-child(3) { inset-block-start: 26px; }
+.burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ── Mobile panel ─────────────────────────────────────────────────────────── */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(6, 15, 19, 0.66);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--e-slow), visibility var(--e-slow);
+}
+.scrim[data-open] { opacity: 1; visibility: visible; }
+
+.panel {
+  position: fixed;
+  inset-block-start: var(--nav-h);
+  inset-inline: 12px;
+  z-index: 58;
+  padding: 18px;
+  border-radius: var(--r-card);
+  background: var(--t-950);
+  border: 1px solid var(--line-hi);
+  box-shadow: var(--shadow-lg), var(--edge);
+  /* Opens from the top edge in 3D rather than sliding: it reads as a panel
+     hinged off the bar it came from. */
+  transform-origin: top center;
+  transform: perspective(900px) rotateX(-12deg) translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform var(--e-slow), opacity var(--e-slow), visibility var(--e-slow);
+}
+.panel[data-open] {
+  transform: perspective(900px) rotateX(0) translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.panel nav { display: grid; gap: 2px; }
+.panel nav a {
+  padding: 14px 14px;
+  border-radius: var(--r-sm);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-2);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: background var(--e-fast), color var(--e-fast), opacity var(--e-slow),
+    transform var(--e-slow);
+  transition-delay: 0ms;
+}
+.panel[data-open] nav a {
+  opacity: 1;
+  transform: none;
+  /* Staggered so the list arrives as a list, not as one block. */
+  transition-delay: calc(60ms + var(--i) * 45ms);
+}
+.panel nav a:hover { background: var(--surface-hi); color: var(--ink); }
+.panelCta { margin-top: 16px; }
+
+/* Below 1024 the inline links become the panel, so the burger and the panel
+   appear and disappear together — a burger with nothing behind it is the
+   classic version of this bug. */
+@media (max-width: 1024px) {
+  .links { display: none; }
+  .ghostCta { display: none; }
+  .burger { display: block; }
+}
+@media (min-width: 1025px) {
+  .panel,
+  .scrim { display: none; }
+}
+@media (max-width: 560px) {
+  .solidCta { display: none; }
+  .brandTag { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { transform: none; }
+  .panel[data-open] { transform: none; }
+}

@@ -1,0 +1,98 @@
+/* Retinted onto the single-hue ramp, and restructured as a rule-divided list
+   rather than six floating cards — the editorial references divide with lines,
+   not with boxes. */
+
+.list {
+  max-width: 900px;
+  margin-inline: auto;
+  border-top: 1px solid var(--line);
+}
+
+.item {
+  border-bottom: 1px solid var(--line);
+  transition: background var(--e-slow);
+}
+.item[data-open] { background: var(--surface); }
+
+.head { margin: 0; }
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 20px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: -.2px;
+  text-align: start;
+  cursor: pointer;
+  transition: color var(--e-fast);
+}
+.trigger:hover { color: var(--t-300); }
+
+/* A plus that rotates into a minus: one bar turns and fades, the other stays.
+   Cheaper and steadier than swapping a glyph, which reflows the row. */
+.sign {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid var(--line-hi);
+  transition: background var(--e-slow), transform var(--e-slow), border-color var(--e-slow);
+}
+/* Physical `left`/`top`: `inset-inline-start` resolves to `right` in RTL, and
+   pairing that with a physical translate lands the bar a half-width off centre. */
+.sign i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  background: var(--t-300);
+  border-radius: 2px;
+  transition: transform var(--e-slow), opacity var(--e-slow), background var(--e-slow);
+}
+.sign i:first-child { width: 12px; height: 2px; }
+.sign i:last-child { width: 2px; height: 12px; }
+
+.item[data-open] .sign { background: var(--t-500); border-color: var(--t-500); transform: rotate(180deg); }
+.item[data-open] .sign i { background: var(--t-950); }
+.item[data-open] .sign i:last-child { transform: scaleY(0); opacity: 0; }
+
+/* 0fr → 1fr is what makes an unknown height animatable. The inner element must
+   carry `min-height:0`, or the grid row refuses to shrink below its content. */
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--e-slow);
+}
+.item[data-open] .panel { grid-template-rows: 1fr; }
+
+.panelInner {
+  min-height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--e-slow), visibility var(--e-slow);
+}
+.item[data-open] .panelInner { visibility: visible; opacity: 1; }
+
+.panelInner p {
+  color: var(--ink-2);
+  font-size: 15.5px;
+  max-width: 74ch;
+  padding: 0 20px 28px;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .trigger { padding: 20px 4px; font-size: 16px; }
+  .panelInner p { padding: 0 4px 22px; }
+}

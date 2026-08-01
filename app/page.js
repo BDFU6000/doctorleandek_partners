@@ -1,6 +1,15 @@
 import Image from "next/image";
 import s from "./page.module.css";
 import { SITE } from "./site-config";
+import OrbitScene from "./components/OrbitScene";
+import SiteNav from "./components/SiteNav";
+import Reveal from "./components/Reveal";
+import TiltCard from "./components/TiltCard";
+import MagneticLink from "./components/MagneticLink";
+import CountUp from "./components/CountUp";
+import Parallax from "./components/Parallax";
+import ScrollProgress from "./components/ScrollProgress";
+import Faq from "./components/Faq";
 import {
   IconStethoscope,
   IconPharmacy,
@@ -10,6 +19,11 @@ import {
   IconCheck,
   IconCross,
 } from "./icons";
+
+// Arabic-Indic numerals everywhere something is counted. Latin digits in one
+// list and ٠١ in the next reads as an oversight, which on an Arabic page it is.
+const ar = new Intl.NumberFormat("ar-EG", { useGrouping: false });
+const idx = (n) => ar.format(n).padStart(2, "٠");
 
 // The five partner roles are the ones that actually exist in the app's UserType
 // enum (lib/core/constants/enums.dart): medicalStaff, pharmacyAdmin,
@@ -76,22 +90,18 @@ const ROLES = [
 
 const BENEFITS = [
   {
-    no: "٠١",
     title: "طلبات تصلك، لا تبحث عنها",
     text: "المرضى يطلبون من التطبيق، والطلب يصل إلى الحساب المناسب في منطقتك بدل الاعتماد على الإعلان والاتصال.",
   },
   {
-    no: "٠٢",
     title: "أنت من يحدد توفرك",
     text: "تستقبل الطلبات حين تكون متاحًا فقط، وتقبل أو ترفض كل طلب على حدة.",
   },
   {
-    no: "٠٣",
     title: "لوحة تحكم لعملك",
     text: "لكل نوع حساب واجهة مصمّمة لعمله: الطبيب يرى زياراته، والصيدلية ترى طلباتها ومخزونها.",
   },
   {
-    no: "٠٤",
     title: "سجل مالي واضح",
     text: "تتابع أرباحك ومعاملاتك من داخل التطبيق، بسجل لكل عملية تمت عبر المنصة.",
   },
@@ -131,6 +141,29 @@ const FAQ = [
   },
 ];
 
+// The marquee needs its list twice for a seamless loop; building the pair here
+// keeps the duplication out of the markup.
+const TICKER = [...ROLES, ...ROLES];
+
+/**
+ * Section label: index numeral, caption, hairline.
+ *
+ * The numeral and the caption stay adjacent and the rule fills what is left —
+ * putting the rule *between* them pushed the caption away from the number it
+ * belongs to, which read as two unrelated bits of chrome. A centred label gets
+ * a rule on both sides so the pair sits in the middle of its own bracket.
+ */
+function Label({ no, children, mid = false }) {
+  return (
+    <div className={`label ${mid ? "labelMid" : ""}`} data-reveal="fade">
+      {mid ? <i aria-hidden="true" /> : null}
+      <b>{idx(no)}</b>
+      <span>{children}</span>
+      <i aria-hidden="true" />
+    </div>
+  );
+}
+
 export default function PartnersPage() {
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -144,267 +177,342 @@ export default function PartnersPage() {
 
   return (
     <>
-      {/* A JSON-LD data block, not executed script, so a strict CSP does not block
-          it and crawlers read it straight out of the served HTML. */}
+      {/* A JSON-LD data block, not executed script, so a strict CSP does not
+          block it and crawlers read it straight out of the served HTML. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <div className={s.stage}>
-        <div className="wrap">
-          <nav className={s.nav}>
-            <div className={s.brand}>
-              <span className={s.brandName}>دكتور لعندك</span>
-              <span className={s.brandTag}>صحتك تهمنا</span>
-            </div>
-            <div className={s.navLinks}>
-              <a href="#roles">من ينضم إلينا</a>
-              <a href="#benefits">لماذا المنصة</a>
-              <a href="#how">خطوات الانضمام</a>
-              <a href="#faq">أسئلة شائعة</a>
-              <a className={s.navCta} href={SITE.mainUrl}>
-                موقع المرضى
-              </a>
-            </div>
-          </nav>
+      <a className="skipLink" href="#roles">
+        تخطّي إلى المحتوى
+      </a>
+      <div id="scroll-progress" aria-hidden="true" />
+      <ScrollProgress />
+      <SiteNav />
 
-          <header className={s.hero}>
-            <div className={s.heroCopy}>
-              <span className="eyebrow">
-                <i /> منصة الشركاء
-              </span>
-              <h1 className="pageTitle">
-                وسّع نطاق عملك
-                <br />
-                مع دكتور لعندك
-              </h1>
-              <p className="bodyLarge">
-                انضم كطبيب أو ممرض أو صيدلية أو مندوب توصيل أو سائق إسعاف،
-                واستقبل طلبات المرضى في منطقتك من منصة واحدة بواجهة عربية
-                مصمّمة لعملك.
-              </p>
-              <div className={s.heroCtas}>
-                <a className="btn btnLight" href={SITE.appUrl}>
-                  سجّل حسابك الآن
-                </a>
-                <a className="btn btnGhost" href="#roles">
-                  تعرّف على أنواع الحسابات
-                </a>
-              </div>
-              <div className={s.stats}>
-                <div className={s.stat}>
-                  <b>٥</b>
-                  <span>أنواع حسابات</span>
+      <Reveal>
+        <div className={s.stage} id="top">
+          <div className={`wrap ${s.stageInner}`}>
+            <header className={s.hero}>
+              <div className={s.heroCopy}>
+                <span className="eyebrow" data-reveal="fade">
+                  <i /> منصة الشركاء
+                </span>
+                <h1 className="pageTitle" data-reveal="rise" style={{ "--i": 1 }}>
+                  وسّع نطاق عملك
+                  <br />
+                  <span className={s.heroAccent}>مع دكتور لعندك</span>
+                </h1>
+                <p className="bodyLarge" data-reveal="" style={{ "--i": 2 }}>
+                  انضم كطبيب أو ممرض أو صيدلية أو مندوب توصيل أو سائق إسعاف،
+                  واستقبل طلبات المرضى في منطقتك من منصة واحدة بواجهة عربية
+                  مصمّمة لعملك.
+                </p>
+                <div className={s.heroCtas} data-reveal="" style={{ "--i": 3 }}>
+                  <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
+                    سجّل حسابك الآن
+                  </MagneticLink>
+                  <MagneticLink className="btn btnGhost" href="#roles">
+                    تعرّف على أنواع الحسابات
+                  </MagneticLink>
                 </div>
-                <div className={s.stat}>
-                  <b>٢٤/٧</b>
-                  <span>طلبات الطوارئ</span>
-                </div>
-                <div className={s.stat}>
-                  <b>عربي</b>
-                  <span>واجهة كاملة</span>
+                <div className={s.stats} data-reveal="" style={{ "--i": 4 }}>
+                  <div className={s.stat}>
+                    <b>
+                      <CountUp to={5} />
+                    </b>
+                    <span>أنواع حسابات</span>
+                  </div>
+                  <div className={s.stat}>
+                    <b>
+                      <CountUp to={24} suffix="/٧" />
+                    </b>
+                    <span>طلبات الطوارئ</span>
+                  </div>
+                  <div className={s.stat}>
+                    <b>عربي</b>
+                    <span>واجهة كاملة</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className={s.heroArt}>
-              <Image
-                src="/img/care.webp"
-                alt="طبيب يحمل حقيبة إسعافات أمام منزل، وخلفه سيارة إسعاف ومندوب توصيل"
-                width={1100}
-                height={1220}
-                priority
-              />
-              <div className={s.heroBadge}>
-                <IconCross /> حسابك يبدأ خلال دقائق
-              </div>
-            </div>
-          </header>
-        </div>
-      </div>
-
-      <section id="roles" className={`${s.rolesWrap} section`}>
-        <div className="wrap">
-          <div className="sectionHead mid">
-            <h2 className="sectionTitle">من ينضم إلى دكتور لعندك</h2>
-            <p className="bodyLarge">
-              خمسة أنواع حسابات، لكل منها واجهة مصمّمة لعمله، لا نسخة واحدة
-              تصلح للجميع.
-            </p>
+              {/* The emblem is the page's one focal object. The WebGL orbit is
+                  mounted INSIDE this box and centred on it — five satellites,
+                  one per account type, converging on the mark. That is the
+                  whole argument of the page, running as an animation. */}
+              <Parallax className={s.heroArt} speed={0.05} tilt={2} data-reveal="scale" style={{ "--i": 2 }}>
+                <div className={s.heroEmblem}>
+                  <span className={s.heroGlow} aria-hidden="true" />
+                  <Image
+                    src="/render/hero-emblem.webp"
+                    alt="شعار دكتور لعندك مجسّمًا: صليب طبي زجاجي بلون فيروزي يحيط به خاتم معدني"
+                    width={928}
+                    height={810}
+                    priority
+                    sizes="(max-width: 900px) 78vw, 46vw"
+                  />
+                  <OrbitScene />
+                  <div className={s.heroBadge}>
+                    <IconCross /> حسابك يبدأ خلال دقائق
+                  </div>
+                </div>
+              </Parallax>
+            </header>
           </div>
 
-          <div className={s.roles}>
-            {ROLES.map((r) => (
-              <article
-                key={r.key}
-                className={`glass ${s.role} ${r.urgent ? s.urgent : ""}`}
-              >
-                <div className={s.roleIcon}>{r.icon}</div>
-                <h3>{r.title}</h3>
-                <p>{r.lead}</p>
-                <ul className={s.roleList}>
-                  {r.points.map((p) => (
-                    <li key={p}>
+          {/* A moving list of exactly the account types the page goes on to
+              describe — a summary that happens to be in motion, not filler. */}
+          <div className={`marquee ${s.ticker}`} aria-hidden="true">
+            <div className="marqueeTrack">
+              {TICKER.map((r, i) => (
+                <span key={`${r.key}-${i}`} className={s.tickerItem}>
+                  {r.icon}
+                  {r.title}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <section id="roles" className={`${s.bandB} section`}>
+          <div className="aurora" aria-hidden="true" />
+          <div className="wrap">
+            <div className="sectionHead mid">
+              <Label no={1} mid>
+                من ينضم إلينا
+              </Label>
+              <h2 className="sectionTitle" data-reveal="">
+                خمسة حسابات، خمس واجهات
+              </h2>
+              <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                لكل نوع حساب واجهة مصمّمة لعمله، لا نسخة واحدة تصلح للجميع.
+              </p>
+            </div>
+
+            <div className={s.roles} data-reveal="">
+              {ROLES.map((r, i) => (
+                <TiltCard
+                  key={r.key}
+                  max={4}
+                  className={`${s.role} ${r.urgent ? s.urgent : ""}`}
+                >
+                  <div className={s.roleTop}>
+                    <div className={s.roleIcon}>{r.icon}</div>
+                    <span className={s.roleNo}>{idx(i + 1)}</span>
+                  </div>
+                  <h3>{r.title}</h3>
+                  <p>{r.lead}</p>
+                  <ul className={s.roleList}>
+                    {r.points.map((p) => (
+                      <li key={p}>
+                        <IconCheck />
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </TiltCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="benefits" className={`${s.bandA} section`}>
+          <div className="wrap">
+            <div className="sectionHead">
+              <Label no={2}>لماذا المنصة</Label>
+              <h2 className="sectionTitle" data-reveal="">
+                المنصة توصّل الطلب،
+                <br />
+                وأنت تتفرغ للعمل
+              </h2>
+            </div>
+            <div className={s.benefits}>
+              {BENEFITS.map((b, i) => (
+                <article key={b.title} className={s.benefit} data-reveal="" style={{ "--i": i }}>
+                  <span className={s.benefitNo}>{idx(i + 1)}</span>
+                  <h3>{b.title}</h3>
+                  <p>{b.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={`${s.bandB} section`}>
+          <div className="wrap">
+            <div className={s.split}>
+              <div className={s.splitTxt}>
+                <Label no={3}>الطلب</Label>
+                <h3 className="sectionTitle" data-reveal="">
+                  يصل إليك جاهزًا
+                </h3>
+                <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                  المريض يحدد الخدمة والعنوان قبل الإرسال، فيصلك الطلب بتفاصيله
+                  كاملة بدل مكالمة تشرح فيها كل شيء من البداية.
+                </p>
+                <ul className={s.checks}>
+                  {[
+                    "تفاصيل الخدمة والعنوان قبل القبول",
+                    "قبول أو رفض لكل طلب على حدة",
+                    "متابعة الحالة حتى اكتمال الخدمة",
+                  ].map((t, i) => (
+                    <li key={t} data-reveal="" style={{ "--i": i + 2 }}>
                       <IconCheck />
-                      <span>{p}</span>
+                      <span>{t}</span>
                     </li>
                   ))}
                 </ul>
-              </article>
-            ))}
+              </div>
+              <Parallax className={s.splitArt} speed={0.09} data-reveal="scale">
+                <span className={s.splitGlow} aria-hidden="true" />
+                <Image
+                  src="/render/request-flow.webp"
+                  alt="هاتف زجاجي مجسّم تطفو أمامه بطاقتا طلب، يرمزان لوصول الطلب بتفاصيله"
+                  width={1024}
+                  height={1024}
+                  sizes="(max-width: 900px) 74vw, 44vw"
+                />
+              </Parallax>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="benefits" className={`${s.benefitsWrap} section`}>
-        <div className="wrap">
-          <div className="sectionHead mid">
-            <h2 className="sectionTitle">لماذا تنضم إلى المنصة</h2>
-            <p className="bodyLarge">
-              المنصة تتكفل بإيصال الطلب إليك، وأنت تتفرغ للعمل نفسه.
+        <section className={`${s.bandA} section`}>
+          <div className="wrap">
+            <div className={`${s.split} ${s.splitFlip}`}>
+              <Parallax className={s.splitArt} speed={0.09} data-reveal="scale">
+                <span className={s.splitGlow} aria-hidden="true" />
+                <Image
+                  src="/render/trust-shield.webp"
+                  alt="درع زجاجي مجسّم بداخله قفل، يرمز إلى مراجعة الحسابات وحماية السجل الطبي"
+                  width={1024}
+                  height={1024}
+                  sizes="(max-width: 900px) 74vw, 44vw"
+                />
+              </Parallax>
+              <div className={s.splitTxt}>
+                <Label no={4}>الثقة</Label>
+                <h3 className="sectionTitle" data-reveal="">
+                  موثوقة من الطرفين
+                </h3>
+                <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                  حسابات مقدمي الخدمة تمر بمراجعة قبل التفعيل، وسجل المريض الطبي
+                  لا يُفتح لك إلا حين يختار هو مشاركته.
+                </p>
+                <ul className={s.checks}>
+                  {[
+                    "مراجعة البيانات قبل تفعيل الحساب",
+                    "صلاحيات مختلفة لكل نوع حساب",
+                    "سجل المريض يُشارك بموافقته",
+                  ].map((t, i) => (
+                    <li key={t} data-reveal="" style={{ "--i": i + 2 }}>
+                      <IconCheck />
+                      <span>{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="how" className={`${s.bandB} section`}>
+          <div className="wrap">
+            <div className="sectionHead mid">
+              <Label no={5} mid>
+                خطوات الانضمام
+              </Label>
+              <h2 className="sectionTitle" data-reveal="">
+                أربع خطوات حتى أول طلب
+              </h2>
+            </div>
+            <ol className={s.steps}>
+              {STEPS.map((st, i) => (
+                <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i }}>
+                  <div className={s.stepNo}>{ar.format(i + 1)}</div>
+                  <h3>{st.title}</h3>
+                  <p>{st.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section id="faq" className={`${s.bandA} section`}>
+          <div className="wrap">
+            <div className="sectionHead mid">
+              <Label no={6} mid>
+                أسئلة شائعة
+              </Label>
+              <h2 className="sectionTitle" data-reveal="">
+                ما يسأل عنه الشركاء
+              </h2>
+            </div>
+            <Faq items={FAQ} />
+          </div>
+        </section>
+
+        <section className={`${s.bandB} ${s.finalWrap} section`}>
+          <div className="aurora" aria-hidden="true" />
+          <div className="wrap">
+            <h2 className="sectionTitle" data-reveal="">
+              جاهز للانضمام؟
+            </h2>
+            <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+              أنشئ حسابك واختر نوعه، وأرسل بياناتك للمراجعة. الطلبات تبدأ
+              بالوصول فور تفعيل الحساب.
             </p>
-          </div>
-          <div className={s.benefits}>
-            {BENEFITS.map((b) => (
-              <article key={b.no} className={`glass ${s.benefit}`}>
-                <span className={s.benefitNo}>{b.no}</span>
-                <h3>{b.title}</h3>
-                <p>{b.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={`${s.splitWrap} section`}>
-        <div className="wrap">
-          <div className={s.split}>
-            <div className={s.splitTxt}>
-              <h3 className="sectionTitle">الطلب يصل إليك جاهزًا</h3>
-              <p className="bodyLarge">
-                المريض يحدد الخدمة والعنوان قبل الإرسال، فيصلك الطلب بتفاصيله
-                كاملة بدل مكالمة تشرح فيها كل شيء من البداية.
-              </p>
-              <ul className={s.checks}>
-                <li>
-                  <IconCheck />
-                  <span>تفاصيل الخدمة والعنوان قبل القبول</span>
-                </li>
-                <li>
-                  <IconCheck />
-                  <span>قبول أو رفض لكل طلب على حدة</span>
-                </li>
-                <li>
-                  <IconCheck />
-                  <span>متابعة الحالة حتى اكتمال الخدمة</span>
-                </li>
-              </ul>
-            </div>
-            <Image
-              src="/img/services.webp"
-              alt="واجهة تطبيق دكتور لعندك محاطة بأيقونات الأدوية والإسعاف والمحفظة والموقع"
-              width={1000}
-              height={933}
-            />
-          </div>
-
-          <div className={s.split}>
-            <Image
-              src="/img/privacy.webp"
-              alt="طبيب إلى جانب درع وقفل يرمزان لحماية البيانات، وعائلة وخدمة على مدار الساعة"
-              width={900}
-              height={799}
-            />
-            <div className={s.splitTxt}>
-              <h3 className="sectionTitle">حسابات موثوقة من الطرفين</h3>
-              <p className="bodyLarge">
-                حسابات مقدمي الخدمة تمر بمراجعة قبل التفعيل، وسجل المريض الطبي
-                لا يُفتح لك إلا حين يختار هو مشاركته.
-              </p>
-              <ul className={s.checks}>
-                <li>
-                  <IconCheck />
-                  <span>مراجعة البيانات قبل تفعيل الحساب</span>
-                </li>
-                <li>
-                  <IconCheck />
-                  <span>صلاحيات مختلفة لكل نوع حساب</span>
-                </li>
-                <li>
-                  <IconCheck />
-                  <span>سجل المريض يُشارك بموافقته</span>
-                </li>
-              </ul>
+            <div className={s.finalCtas} data-reveal="" style={{ "--i": 2 }}>
+              <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
+                سجّل الآن
+              </MagneticLink>
+              <MagneticLink className="btn btnGhost" href={SITE.mainUrl}>
+                زيارة موقع المرضى
+              </MagneticLink>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section id="how" className={`${s.stepsWrap} section`}>
-        <div className="wrap">
-          <div className="sectionHead mid">
-            <h2 className="sectionTitle">خطوات الانضمام</h2>
-            <p className="bodyLarge">أربع خطوات من التسجيل حتى أول طلب يصلك.</p>
-          </div>
-          <ol className={s.steps}>
-            {STEPS.map((st, i) => (
-              <li key={st.title} className={`glass ${s.step}`}>
-                <div className={s.stepNo}>{i + 1}</div>
-                <h3>{st.title}</h3>
-                <p>{st.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section id="faq" className={`${s.faqWrap} section`}>
-        <div className="wrap">
-          <div className="sectionHead mid">
-            <h2 className="sectionTitle">أسئلة شائعة</h2>
-            <p className="bodyLarge">أكثر ما يسأل عنه الشركاء قبل التسجيل.</p>
-          </div>
-          <div className={s.faq}>
-            {FAQ.map((f, i) => (
-              <details key={f.q} open={i === 0}>
-                <summary>{f.q}</summary>
-                <p>{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className={`${s.finalWrap} section`}>
-        <div className="wrap">
-          <h2 className="sectionTitle">جاهز للانضمام؟</h2>
-          <p className="bodyLarge">
-            أنشئ حسابك واختر نوعه، وأرسل بياناتك للمراجعة. الطلبات تبدأ بالوصول
-            فور تفعيل الحساب.
-          </p>
-          <div className={s.finalCtas}>
-            <a className="btn btnLight" href={SITE.appUrl}>
-              سجّل الآن
-            </a>
-            <a className="btn btnGhost" href={SITE.mainUrl}>
-              زيارة موقع المرضى
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <footer className={s.footer}>
-        <div className="wrap">
-          <div className={s.footerRow}>
-            <div className="bodySm">دكتور لعندك · صحتك تهمنا · ليبيا</div>
-            <div className={`${s.footerLinks} bodySm`}>
-              <a href={SITE.mainUrl}>موقع المرضى</a>
-              <a href={SITE.appUrl}>فتح التطبيق</a>
+        <footer className={s.footer}>
+          <div className="wrap">
+            <div className={s.footerGrid}>
+              <div className={s.footerBrand}>
+                <span className={s.footerName}>دكتور لعندك</span>
+                <p>
+                  منصة رعاية صحية في ليبيا تصل المرضى بالأطباء والصيدليات
+                  ومقدمي التوصيل والإسعاف من تطبيق واحد.
+                </p>
+              </div>
+              <div className={s.footerCol}>
+                <h4>الصفحة</h4>
+                <a href="#roles">من ينضم إلينا</a>
+                <a href="#benefits">لماذا المنصة</a>
+                <a href="#how">خطوات الانضمام</a>
+                <a href="#faq">أسئلة شائعة</a>
+              </div>
+              <div className={s.footerCol}>
+                <h4>روابط</h4>
+                <a href={SITE.mainUrl}>موقع المرضى</a>
+                <a href={SITE.appUrl}>فتح التطبيق</a>
+                <a href={SITE.appUrl}>تسجيل حساب شريك</a>
+              </div>
+            </div>
+            <div className={`${s.footerBar} bodySm`}>
+              <span>دكتور لعندك · صحتك تهمنا</span>
+              <span>ليبيا</span>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </Reveal>
+
+      {/* On a phone the header CTA is dropped for room, so the primary action
+          returns as a bar pinned to the thumb. */}
+      <div className={s.mobileBar}>
+        <a className="btn btnPrimary btnFull" href={SITE.appUrl}>
+          سجّل حسابك الآن
+        </a>
+      </div>
     </>
   );
 }

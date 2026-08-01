@@ -1,133 +1,453 @@
-/* Page-scoped styles. Every colour, radius, shadow and gap comes from a token in
-   globals.css, so nothing here re-declares a design-system value. */
+/* Page-scoped styles. Every colour comes from the ramp in globals.css; nothing
+   here declares a hex. The language is taken from the editorial references in
+   `website Stlyes brainstorming`: a hue-tinted near-black canvas, one accent,
+   hairline rules doing the dividing that boxes and shadows used to do,
+   oversized display headings, and index numerals on everything countable. */
 
-/* ── Header + hero share one continuous App Bar gradient ──────────────────── */
-.stage{background:var(--grad-appbar);position:relative;overflow:hidden}
-/* Depth without an image: the sheet asks for gradients, not flat fills. */
-.stage::before{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(900px 520px at 78% -8%,rgba(255,255,255,.20),transparent 60%),
-    linear-gradient(180deg,transparent 55%,rgba(18,35,49,.55) 100%);
+/* ── Bands ─────────────────────────────────────────────────────────────────
+   Sections alternate between the two darkest ramp steps and are separated by a
+   single hairline. That is the whole page structure: no cards floating on
+   gradients, just bands and rules. */
+.bandA { background: var(--t-900); }
+.bandB { background: var(--t-950); }
+.bandA + .bandB,
+.bandB + .bandA { border-top: 1px solid var(--line); }
+
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: var(--t-900);
+  padding-block-start: var(--nav-h);
+  isolation: isolate;
 }
-.stage > *{position:relative}
-
-.nav{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-block:20px}
-.brand{display:flex;align-items:baseline;gap:10px;line-height:1}
-.brandName{font-size:22px;font-weight:800;letter-spacing:.2px}
-.brandTag{font-size:12.5px;font-weight:600;color:#cdeaf1}
-.navLinks{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
-.navLinks a{font-size:15px;font-weight:600;color:rgba(255,255,255,.9);padding-block:4px;border-bottom:2px solid transparent}
-.navLinks a:hover{color:#fff;border-bottom-color:var(--light-teal)}
-.navCta{border:1.5px solid rgba(255,255,255,.45);border-radius:var(--r-button);padding:9px 20px}
-.navCta:hover{background:#fff;color:var(--navy);border-color:#fff}
-
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center;padding-block:36px clamp(56px,7vw,92px)}
-.heroCopy h1{margin-block:20px 16px}
-.heroCopy > p{color:rgba(255,255,255,.88);max-width:52ch}
-.heroCtas{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
-
-.stats{display:flex;gap:30px;flex-wrap:wrap;margin-top:32px;border-top:1px solid rgba(255,255,255,.18);padding-top:22px}
-.stat b{display:block;font-size:21px;font-weight:800;line-height:1.35}
-.stat span{font-size:13.5px;color:rgba(255,255,255,.74)}
-
-.heroArt{position:relative}
-.heroArt img{
-  border-radius:var(--r-card);border:1px solid rgba(255,255,255,.16);
-  box-shadow:var(--shadow-lg);max-height:460px;object-fit:cover;width:100%;
+/* One soft pool of the primary behind the emblem side. The page is RTL, so the
+   artwork sits on the LEFT and this percentage is written for that. */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(760px 620px at 26% 46%, rgba(43, 145, 167, 0.22), transparent 68%);
 }
-.heroBadge{
-  position:absolute;bottom:-18px;inset-inline-start:-14px;
-  background:#fff;color:var(--navy);border-radius:var(--r-input);
-  padding:12px 18px;box-shadow:var(--shadow-lg);
-  display:flex;align-items:center;gap:11px;font-weight:700;font-size:14.5px;
-}
-.heroBadge svg{width:22px;height:22px;color:var(--primary-teal);flex:0 0 auto}
 
-/* ── Roles ────────────────────────────────────────────────────────────────── */
-.rolesWrap{background:var(--navy)}
-.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(288px,1fr));gap:var(--gap-item)}
-.role{padding:28px;display:flex;flex-direction:column}
-.roleIcon{
-  width:54px;height:54px;border-radius:var(--r-input);
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(84,172,191,.18);color:var(--light-teal);margin-bottom:18px;
-}
-.roleIcon svg{width:27px;height:27px}
-.urgent .roleIcon{background:rgba(199,25,28,.18);color:#ff7376}
-.role h3{font-size:20px;font-weight:800;margin-bottom:8px}
-.role > p{color:rgba(255,255,255,.74);font-size:15.5px;margin-bottom:16px}
-.roleList{display:grid;gap:9px;margin-top:auto}
-.roleList li{display:flex;gap:10px;font-size:14.5px;color:rgba(255,255,255,.86);line-height:1.7}
-.roleList svg{width:17px;height:17px;flex:0 0 auto;margin-top:6px;color:var(--light-teal)}
+.stageInner { position: relative; z-index: 1; }
 
-/* ── Benefits ─────────────────────────────────────────────────────────────── */
-.benefitsWrap{background:var(--grad-bottomnav)}
-.benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:var(--gap-item)}
-.benefit{padding:26px}
-.benefitNo{font-size:13px;font-weight:800;color:var(--light-teal);letter-spacing:1px;display:block;margin-bottom:10px}
-.benefit h3{font-size:18px;font-weight:700;margin-bottom:8px}
-.benefit p{color:rgba(255,255,255,.78);font-size:15px}
-
-/* ── Steps ────────────────────────────────────────────────────────────────── */
-.stepsWrap{background:var(--navy)}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--gap-item)}
-.step{padding:26px}
-.stepNo{
-  width:44px;height:44px;border-radius:14px;background:var(--grad-button);
-  display:flex;align-items:center;justify-content:center;
-  font-weight:800;font-size:17px;margin-bottom:16px;box-shadow:var(--shadow);
+.hero {
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+  padding-block: clamp(40px, 6vw, 84px) clamp(56px, 7vw, 96px);
 }
-.step h3{font-size:17.5px;font-weight:700;margin-bottom:7px}
-.step p{color:rgba(255,255,255,.76);font-size:15px}
+
+.heroCopy h1 { margin-block: 24px 20px; }
+.heroCopy > p { max-width: 46ch; }
+
+/* The second line carries the accent. One tint step, not a rainbow gradient:
+   the reference kits use a single accent colour and let the size do the work. */
+.heroAccent { color: var(--t-300); }
+
+.heroCtas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
+
+/* Stats sit in a hairline strip, divided by rules rather than gaps. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 44px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.stat { padding: 20px 8px 18px; }
+.stat + .stat { border-inline-start: 1px solid var(--line); padding-inline-start: 20px; }
+.stat b {
+  display: block;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: var(--t-200);
+  /* Fixed digit widths: the count-up must not make the row jitter as it ticks. */
+  font-variant-numeric: tabular-nums;
+}
+.stat span {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--ink-3);
+}
+
+/* ── Hero emblem ───────────────────────────────────────────────────────────
+   The render's own background is exactly --t-900, so it needs no frame, no
+   border and no card. It is simply placed on the canvas and lit from behind. */
+.heroArt {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.heroEmblem {
+  position: relative;
+  width: min(100%, 560px);
+  animation: float 8s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -14px; }
+}
+.heroEmblem img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  /* The render carries its own radial glow, which is brighter than the canvas,
+     so the image box would otherwise show as a lighter rectangle. This fades it
+     out into the page.
+
+     `ellipse closest-side` is doing specific work: a plain `circle` defaults to
+     farthest-CORNER, whose radius is larger than the distance to the nearest
+     edge, so the gradient is still fully opaque where the top and bottom edges
+     are — which is exactly the hard rectangle it was supposed to remove. An
+     ellipse sized to the closest side touches all four edge midpoints, so every
+     edge is genuinely transparent. */
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 48%,
+    #000 58%, rgba(0, 0, 0, 0.6) 82%, transparent 100%);
+  mask-image: radial-gradient(ellipse closest-side at 50% 48%,
+    #000 58%, rgba(0, 0, 0, 0.6) 82%, transparent 100%);
+}
+.heroGlow {
+  position: absolute;
+  inset: 4% 4% 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(43, 145, 167, 0.42), transparent 68%);
+  filter: blur(60px);
+  z-index: 0;
+}
+
+.heroBadge {
+  position: absolute;
+  z-index: 3;
+  inset-block-end: 4%;
+  inset-inline-start: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-radius: var(--r-pill);
+  background: var(--t-950);
+  border: 1px solid var(--line-hi);
+  box-shadow: var(--shadow), var(--edge);
+  font-weight: 700;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+.heroBadge svg { width: 18px; height: 18px; color: var(--t-400); flex: 0 0 auto; }
+
+/* ── Ticker ───────────────────────────────────────────────────────────────── */
+.ticker {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--line);
+  padding-block: 18px;
+}
+.tickerItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.tickerItem svg { width: 17px; height: 17px; color: var(--t-400); flex: 0 0 auto; }
+
+/* ── Roles ────────────────────────────────────────────────────────────────
+   A real grid, not five floating cards: the container owns the border and the
+   1px gaps show the line colour through, so the whole block reads as one
+   table. The 6-column track with spans of 2 and 3 fills exactly, which is why
+   there is never a hole where a sixth card would be. */
+.roles {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.role {
+  grid-column: span 2;
+  background: var(--t-900);
+  padding: 32px 28px 30px;
+  display: flex;
+  flex-direction: column;
+  transition: background var(--e-slow);
+}
+.role:nth-child(4), .role:nth-child(5) { grid-column: span 3; }
+.role:hover { background: var(--surface-hi); }
+
+.roleTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.roleIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-hi);
+  color: var(--t-300);
+  transform: translateZ(30px);
+  transition: color var(--e-slow), border-color var(--e-slow), background var(--e-slow);
+}
+.roleIcon svg { width: 23px; height: 23px; }
+.role:hover .roleIcon { background: var(--t-500); border-color: var(--t-500); color: var(--t-950); }
+
+.roleNo {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--t-700);
+  transition: color var(--e-slow);
+}
+.role:hover .roleNo { color: var(--t-400); }
+
+/* Emergency is a signal, not a theme. It appears here and nowhere else. */
+.urgent .roleIcon { color: var(--danger); border-color: rgba(199, 25, 28, 0.45); }
+.urgent:hover .roleIcon { background: var(--danger); border-color: var(--danger); color: var(--white); }
+.urgent:hover .roleNo { color: var(--danger); }
+
+.role h3 { font-size: 21px; font-weight: 800; margin-bottom: 10px; letter-spacing: -.3px; }
+.role > p { color: var(--ink-2); font-size: 15px; margin-bottom: 22px; }
+.roleList { display: grid; gap: 10px; margin-top: auto; padding-top: 20px; border-top: 1px solid var(--line); }
+.roleList li { display: flex; gap: 10px; font-size: 14px; color: var(--ink-2); line-height: 1.7; }
+.roleList svg { width: 15px; height: 15px; flex: 0 0 auto; margin-top: 7px; color: var(--t-500); }
+
+/* ── Benefits ─────────────────────────────────────────────────────────────
+   Oversized index numerals, hairline dividers, no boxes at all. This is the
+   portfolio kits' "table of contents" block. */
+.benefits {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
+}
+.benefit { padding: 40px 26px 8px; }
+.benefit + .benefit { border-inline-start: 1px solid var(--line); }
+.benefitNo {
+  display: block;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--t-800);
+  margin-bottom: 22px;
+  transition: color var(--e-slow);
+}
+.benefit:hover .benefitNo { color: var(--t-500); }
+.benefit h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.2px; }
+.benefit p { color: var(--ink-2); font-size: 14.5px; }
 
 /* ── Split rows ───────────────────────────────────────────────────────────── */
-.splitWrap{background:var(--grad-bottomnav)}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center}
-.split + .split{margin-top:clamp(48px,6vw,84px)}
-.split img{
-  border-radius:var(--r-card);box-shadow:var(--shadow-lg);width:100%;
-  max-height:430px;object-fit:cover;border:1px solid rgba(255,255,255,.12);
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 80px);
+  align-items: center;
 }
-.splitTxt h3{margin-bottom:14px}
-.splitTxt > p{color:rgba(255,255,255,.8);margin-bottom:18px}
-.checks{display:grid;gap:11px}
-.checks li{display:flex;gap:11px;font-size:15.5px;line-height:1.75}
-.checks svg{width:19px;height:19px;flex:0 0 auto;margin-top:5px;color:var(--light-teal)}
-
-/* ── FAQ ──────────────────────────────────────────────────────────────────── */
-.faqWrap{background:var(--navy)}
-.faq{max-width:860px;margin-inline:auto}
-.faq details{
-  padding:20px 24px;margin-bottom:14px;
-  background:var(--card-glass);border:1px solid var(--card-border);
-  border-radius:var(--r-card);
+.splitArt { position: relative; display: flex; justify-content: center; }
+.splitArt img {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 520px);
+  height: auto;
+  /* Same ellipse-closest-side fade as the hero emblem, for the same reason. */
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 50%,
+    #000 56%, rgba(0, 0, 0, 0.6) 80%, transparent 100%);
+  mask-image: radial-gradient(ellipse closest-side at 50% 50%,
+    #000 56%, rgba(0, 0, 0, 0.6) 80%, transparent 100%);
 }
-.faq details[open]{border-color:rgba(84,172,191,.5)}
-.faq summary{
-  font-weight:700;font-size:17px;cursor:pointer;list-style:none;
-  display:flex;justify-content:space-between;gap:16px;align-items:center;
+.splitGlow {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(43, 145, 167, 0.34), transparent 66%);
+  filter: blur(64px);
+  z-index: 0;
 }
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";color:var(--light-teal);font-size:22px;line-height:1}
-.faq details[open] summary::after{content:"−"}
-.faq details p{color:rgba(255,255,255,.78);margin-top:12px;font-size:15.5px}
 
-/* ── Final CTA + footer ───────────────────────────────────────────────────── */
-.finalWrap{background:var(--grad-appbar);text-align:center}
-.finalWrap > div > p{color:rgba(255,255,255,.88);max-width:56ch;margin:14px auto 28px}
-.finalCtas{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.splitTxt h3 { margin-bottom: 18px; }
+.splitTxt > p { margin-bottom: 26px; }
+.checks { display: grid; }
+.checks li {
+  display: flex;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  padding-block: 14px;
+  border-top: 1px solid var(--line);
+}
+.checks li:last-child { border-bottom: 1px solid var(--line); }
+.checks svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 6px; color: var(--t-500); }
 
-.footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.1);padding-block:36px}
-.footerRow{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
-.footerLinks{display:flex;gap:22px;flex-wrap:wrap}
-.footer a:hover{text-decoration:underline}
+/* ── Steps ────────────────────────────────────────────────────────────────
+   A timeline, not four cards. One hairline runs through every numeral, which
+   is the thing that makes four boxes read as a sequence. */
+.steps {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+}
+.steps::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 26px;
+  inset-inline: 8%;
+  height: 1px;
+  background: var(--line);
+}
+.step { position: relative; }
+.stepNo {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--t-900);
+  border: 1px solid var(--line-hi);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--t-200);
+  margin-bottom: 24px;
+  transition: background var(--e-slow), color var(--e-slow), border-color var(--e-slow),
+    box-shadow var(--e-slow);
+}
+.step:hover .stepNo {
+  background: var(--t-500);
+  border-color: var(--t-500);
+  color: var(--t-950);
+  box-shadow: var(--shadow-glow);
+}
+.step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.step p { color: var(--ink-2); font-size: 14.5px; }
 
-@media (max-width:900px){
-  .hero,.split{grid-template-columns:1fr;gap:34px}
-  .hero{text-align:center}
-  .heroCopy > p{margin-inline:auto}
-  .heroCtas,.stats{justify-content:center}
-  .heroArt{order:-1}
-  .heroBadge{inset-inline-start:50%;transform:translateX(50%);bottom:-20px}
+/* ── Final CTA ────────────────────────────────────────────────────────────── */
+.finalWrap { position: relative; overflow: hidden; text-align: center; }
+.finalWrap > div { position: relative; z-index: 1; }
+.finalWrap h2 { max-width: 20ch; margin-inline: auto; }
+.finalWrap p { max-width: 52ch; margin: 20px auto 34px; }
+.finalCtas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────
+   Multi-column, from the agency kit: brand block, then link columns, then a
+   hairline and a legal row. */
+.footer { background: var(--t-950); border-top: 1px solid var(--line); padding-block: 64px 32px; }
+.footerGrid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 40px;
+  padding-bottom: 44px;
+}
+.footerBrand { display: flex; flex-direction: column; gap: 14px; max-width: 34ch; }
+.footerName { font-size: 20px; font-weight: 800; letter-spacing: .2px; }
+.footerBrand p { color: var(--ink-3); font-size: 14px; }
+.footerCol h4 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--t-500);
+  margin-bottom: 18px;
+}
+.footerCol a {
+  display: block;
+  padding-block: 7px;
+  font-size: 14.5px;
+  color: var(--ink-2);
+  transition: color var(--e-fast), padding-inline-start var(--e-fast);
+}
+.footerCol a:hover { color: var(--t-300); padding-inline-start: 6px; }
+.footerBar {
+  border-top: 1px solid var(--line);
+  padding-top: 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  color: var(--ink-3);
+}
+
+/* ── Mobile action bar ────────────────────────────────────────────────────── */
+.mobileBar {
+  display: none;
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 50;
+  padding: 12px var(--pad-outer) calc(12px + env(safe-area-inset-bottom));
+  background: rgba(6, 15, 19, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  .roles { grid-template-columns: repeat(2, 1fr); }
+  .role, .role:nth-child(4), .role:nth-child(5) { grid-column: span 1; }
+  .role:last-child { grid-column: span 2; }
+  .benefits { grid-template-columns: repeat(2, 1fr); }
+  .benefit:nth-child(3) { border-inline-start: 0; }
+  .benefit:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  .steps { grid-template-columns: repeat(2, 1fr); row-gap: 44px; }
+  .steps::before { display: none; }
+}
+
+@media (max-width: 900px) {
+  .hero, .split { grid-template-columns: 1fr; }
+  .hero { text-align: center; padding-block-start: 24px; }
+  .heroCopy > p { margin-inline: auto; }
+  .heroCtas { justify-content: center; }
+  .heroArt { order: -1; }
+  .heroEmblem { width: min(78%, 400px); }
+  .heroBadge { inset-inline-start: 50%; transform: translateX(50%); inset-block-end: -4%; }
+  /* Text before picture in both rows once they stack, so the reason to look at
+     the picture always arrives first. */
+  .splitFlip .splitArt { order: 2; }
+  .splitArt img { width: min(74%, 380px); }
+  .footerGrid { grid-template-columns: 1fr 1fr; }
+  .footerBrand { grid-column: span 2; }
+}
+
+@media (max-width: 640px) {
+  .roles { grid-template-columns: 1fr; }
+  .role, .role:last-child, .role:nth-child(4), .role:nth-child(5) { grid-column: span 1; }
+  .benefits { grid-template-columns: 1fr; }
+  .benefit + .benefit { border-inline-start: 0; border-top: 1px solid var(--line); }
+  .steps { grid-template-columns: 1fr; row-gap: 32px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat:nth-child(3) { grid-column: span 2; border-inline-start: 0; border-top: 1px solid var(--line); }
+}
+
+@media (max-width: 560px) {
+  .mobileBar { display: block; }
+  /* Room for the fixed bar, so the legal row is not permanently half-covered. */
+  .footer { padding-block-end: 104px; }
 }
