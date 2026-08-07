@@ -7,9 +7,11 @@ import Reveal from "./components/Reveal";
 import TiltCard from "./components/TiltCard";
 import MagneticLink from "./components/MagneticLink";
 import CountUp from "./components/CountUp";
+import StatScene from "./components/StatScene";
 import Parallax from "./components/Parallax";
 import ScrollProgress from "./components/ScrollProgress";
 import Faq from "./components/Faq";
+import { getPlatformStats } from "./lib/stats";
 import {
   IconStethoscope,
   IconPharmacy,
@@ -166,6 +168,49 @@ const STEP_WAVE = "M50 0C92 28 8 72 50 100";
  * belongs to, which read as two unrelated bits of chrome. A centred label gets
  * a rule on both sides so the pair sits in the middle of its own bracket.
  */
+/* The three live counters, in the order a partner cares about them: the
+   businesses already on the platform, the clinicians already verified, and the
+   patients those two would be serving. Each carries the 3D object that stands
+   for it in the hero orbit, so the vocabulary is the same one the page opened
+   with. `note` says what the number actually counts — a counter that will not
+   say what it measures is a counter nobody has to stand behind. */
+const COUNTERS = [
+  {
+    key: "pharmacies",
+    model: "pharmacy",
+    unit: "صيدلية شريكة",
+    note: "صيدليات مفعّلة تستقبل الطلبات الآن",
+  },
+  {
+    key: "medicalStaff",
+    model: "medical",
+    unit: "طبيب وممرض",
+    note: "كوادر اكتملت مراجعة رخصتها واعتُمدت",
+  },
+  {
+    key: "patients",
+    model: "patients",
+    unit: "حساب مريض نشط",
+    note: "حسابات مرضى قائمة على المنصة",
+  },
+];
+
+/* Latin numerals inside an Arabic date, matching the rest of the page. The
+   `-u-nu-latn` extension is what forces that: plain "ar-LY" would render ٠١٢
+   and put two numeral systems on one screen. Tripoli time, because the reader
+   is in Libya and a UTC stamp would be quietly wrong for a third of the day. */
+const stampFmt = new Intl.DateTimeFormat("ar-LY-u-nu-latn", {
+  timeZone: "Africa/Tripoli",
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+function stamp(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : stampFmt.format(d);
+}
+
 function Label({ no, children, mid = false }) {
   return (
     <div className={`label ${mid ? "labelMid" : ""}`} data-reveal="fade">
@@ -177,7 +222,13 @@ function Label({ no, children, mid = false }) {
   );
 }
 
-export default function PartnersPage() {
+export default async function PartnersPage() {
+  // Live counts, read on the server while this page is rendered. Null means the
+  // backend did not answer, and the counters section is then not rendered at
+  // all — see lib/stats.js for why that beats showing zeros.
+  const stats = await getPlatformStats();
+  const updated = stats ? stamp(stats.updatedAt) : null;
+
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -202,7 +253,7 @@ export default function PartnersPage() {
       </a>
       <div id="scroll-progress" aria-hidden="true" />
       <ScrollProgress />
-      <SiteNav />
+      <SiteNav withNumbers={Boolean(stats)} />
 
       <Reveal>
         <div className={s.stage} id="top">
@@ -287,6 +338,52 @@ export default function PartnersPage() {
             </div>
           </div>
         </div>
+
+        {/* The live counters, first thing under the hero: a partner deciding
+            whether to join asks how big the network already is before anything
+            else on this page can matter. The numbers come from the platform's
+            own database, not from this file. */}
+        {stats && (
+          <section id="numbers" className={`${s.bandA} section`}>
+            <div className="wrap">
+              <div className="sectionHead mid">
+                {/* An eyebrow rather than an indexed Label: this section is
+                    conditional on the backend answering, and a numeral that
+                    shifts 01→02 depending on a fetch is not an index. */}
+                <span className="eyebrow" data-reveal="fade">
+                  <i /> أرقام المنصة
+                </span>
+                <h2 className="sectionTitle" data-reveal="">
+                  الشبكة التي ستنضم إليها
+                </h2>
+                <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                  أرقام حقيقية من قاعدة بيانات المنصة، لا تقديرات، وتُحدَّث
+                  تلقائيًا على مدار اليوم.
+                </p>
+              </div>
+
+              <div className={s.counters}>
+                {COUNTERS.map((c, i) => (
+                  <TiltCard key={c.key} max={4} className={s.counter} data-reveal="" style={{ "--i": i }}>
+                    <span className={s.counterGlow} aria-hidden="true" />
+                    <StatScene model={c.model} phase={i * 1.7} />
+                    <b className={s.counterValue}>
+                      <CountUp to={stats[c.key]} />
+                    </b>
+                    <h3 className={s.counterUnit}>{c.unit}</h3>
+                    <p className={s.counterNote}>{c.note}</p>
+                  </TiltCard>
+                ))}
+              </div>
+
+              {updated && (
+                <p className={s.countersMeta} data-reveal="fade">
+                  آخر تحديث للأرقام: {updated}
+                </p>
+              )}
+            </div>
+          </section>
+        )}
 
         <section id="roles" className={`${s.bandB} section`}>
           <div className="aurora" aria-hidden="true" />

@@ -1,6 +1,6 @@
 # Cloude Code ToolBox — MCP & Skills awareness
 
-_Generated: 2026-07-31T23:29:17.059Z_
+_Generated: 2026-08-07T12:20:30.011Z_
 
 ## How to use this report
 
@@ -137,6 +137,9 @@ _None found (or no workspace open)._
 
 - **x-writer** — `C:\Users\hp\.claude\skills\x-writer`
   - Creates viral X (Twitter) posts using proven formats, post templates, and creator voice matching. Use when user needs engaging, high-performing posts for X/Twitter.
+
+- **grill-me** — `C:\Users\hp\.agents\skills\grill-me`
+  - A relentless interview to sharpen a plan or design.
 
 ---
 

@@ -113,6 +113,23 @@ makes it a CTA.
 **Cards dropped the backdrop blur.** A `backdrop-filter` on twenty cards is real work for a phone,
 and on a flat canvas there is nothing behind them to blur.
 
+### The live counters (`#numbers`)
+
+Three cards on the same hairline lattice as the roles grid, each carrying a turning 3D object, a
+number at display size, the unit, and one line saying what the number counts.
+
+The numbers are **read from the platform's database**, never typed here: `app/lib/stats.js` calls
+`rpc_public_stats` on the server while the page renders, and the page is rebuilt every 15 minutes.
+Three rules hold that section honest:
+
+- **Nothing is rounded up and nothing is padded.** A partner deciding whether to join is exactly the
+  reader who will find out.
+- **Every card says what it measures** (`note`), because a counter nobody will define is a counter
+  nobody has to stand behind.
+- **No numbers, no section.** If the backend does not answer, the section and its nav link are not
+  rendered at all. Zeros under a heading that says "our numbers" read as a broken page, and inventing
+  a figure to avoid that is the one thing the section cannot do.
+
 ## Motion
 
 The sheet is silent on motion, so this is the one part of the system that is
@@ -237,6 +254,29 @@ it was there to stop someone dropping a rendered cartoon doctor next to the onbo
 This site is a different surface with its own object language. The hero figure is the logo's own
 doctor rendered as a smooth ceramic figurine, not a cartoon and not a photoreal person, and the
 rest are abstract objects: no places, no narrative, no second illustration family.
+
+### The live 3D, and why it is not a library
+
+Two components draw real geometry against WebGL: `OrbitScene` (five satellites around the hero
+emblem) and `StatScene` (one turning object per live counter). Both are built from
+`app/lib/gl-geometry.js` and lit by the shader in `app/lib/gl-core.js`, which is shared **so the two
+scenes are lit by the same lamp** — they sit a screen apart, and the moment their key light
+disagrees they stop reading as objects in one room.
+
+There is no three.js, no model file, no loader. The whole 3D layer is a few hundred lines and ships
+in the page bundle, which is why this site still has exactly two dependencies. The shapes carry the
+same meanings in both scenes:
+
+| Shape | Means |
+|---|---|
+| `capsule` | the pharmacy — it is the pill |
+| `crescentPrism` | the medical staff — the page's own mark, in depth |
+| `icosahedron` cluster inside a `torus` | the patients — the one plural shape in the set |
+
+Every scene keeps the same four rules: colours are read off the live stylesheet so `globals.css`
+stays the only home for the ramp; the loop is paused off-screen and on a hidden tab; reduced motion
+gets one still frame rather than a blank box; and no WebGL means no canvas at all, with the card's
+own radial glow standing in as a finished design rather than a hole.
 
 ## Where else this system lives
 

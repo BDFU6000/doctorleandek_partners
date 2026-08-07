@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { mat4, perspective, multiply, compose, normalMat3, hex } from "../lib/gl-math";
 import { icosahedron, capsule, torus, crescentPrism } from "../lib/gl-geometry";
+import { SOLID_VERT, SOLID_FRAG, compile, buffer } from "../lib/gl-core";
 import s from "./OrbitScene.module.css";
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -25,51 +26,9 @@ import s from "./OrbitScene.module.css";
    stands alone, and reduced motion gets one still frame rather than a blank.
    ───────────────────────────────────────────────────────────────────────────── */
 
-const VERT = `
-attribute vec3 aPos;
-attribute vec3 aNormal;
-uniform mat4 uProj, uView, uModel;
-uniform mat3 uNormalMat;
-varying vec3 vN;
-varying vec3 vViewPos;
-void main(){
-  vec4 viewPos = uView * uModel * vec4(aPos, 1.0);
-  vN = uNormalMat * aNormal;
-  vViewPos = viewPos.xyz;
-  gl_Position = uProj * viewPos;
-}`;
-
-const FRAG = `
-precision mediump float;
-varying vec3 vN;
-varying vec3 vViewPos;
-uniform vec3 uLit;
-uniform vec3 uShade;
-uniform vec3 uRim;
-uniform float uFade;   // 1 = fully dissolved (used for the far half of the orbit)
-
-void main(){
-  vec3 N = normalize(vN);
-  vec3 V = normalize(-vViewPos);
-  // Key from the upper left to match the lighting baked into the render, so
-  // the satellites and the emblem look lit by the same lamp.
-  vec3 key  = normalize(vec3(-0.55,  0.72,  0.55));
-  vec3 fill = normalize(vec3( 0.62, -0.20,  0.42));
-
-  float kd = max(dot(N, key), 0.0);
-  float fd = max(dot(N, fill), 0.0);
-  float spec = pow(max(dot(N, normalize(key + V)), 0.0), 46.0);
-  float fres = pow(1.0 - max(dot(N, V), 0.0), 2.3);
-
-  vec3 col = mix(uShade, uLit, kd * kd);
-  col += uLit * fd * 0.2;
-  col += uRim * fres * 0.85;
-  col += vec3(1.0) * spec * 0.45;
-
-  float haze = smoothstep(-5.0, -18.0, vViewPos.z);
-  gl_FragColor = vec4(col, (1.0 - haze * 0.55) * (1.0 - uFade));
-}`;
-
+// The solid shader pair lives in lib/gl-core.js, shared with the counter models
+// in StatScene so both are lit by the same lamp. The dust below is this scene's
+// alone: nothing else on the page has a starfield.
 const DUST_VERT = `
 attribute vec3 aPos;
 attribute float aSeed;
@@ -94,36 +53,6 @@ void main(){
   float a = smoothstep(0.5, 0.05, d) * smoothstep(17.0, 6.0, vDepth);
   gl_FragColor = vec4(uColor, a * 0.42);
 }`;
-
-function compile(gl, vsSrc, fsSrc) {
-  const make = (type, src) => {
-    const sh = gl.createShader(type);
-    gl.shaderSource(sh, src);
-    gl.compileShader(sh);
-    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-      gl.deleteShader(sh);
-      return null;
-    }
-    return sh;
-  };
-  const vs = make(gl.VERTEX_SHADER, vsSrc);
-  const fs = make(gl.FRAGMENT_SHADER, fsSrc);
-  if (!vs || !fs) return null;
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  gl.deleteShader(vs);
-  gl.deleteShader(fs);
-  return gl.getProgramParameter(prog, gl.LINK_STATUS) ? prog : null;
-}
-
-function buffer(gl, data) {
-  const b = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, b);
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  return b;
-}
 
 /* One satellite per partner account type, in the order the page introduces
    them. The shape is the role: crystal for medical staff is a stretch, but the
@@ -174,7 +103,7 @@ export default function OrbitScene() {
     const gl = canvas.getContext("webgl", opts) || canvas.getContext("experimental-webgl", opts);
     if (!gl) return; // no WebGL: the render alone is already the design
 
-    const prog = compile(gl, VERT, FRAG);
+    const prog = compile(gl, SOLID_VERT, SOLID_FRAG);
     const dustProg = compile(gl, DUST_VERT, DUST_FRAG);
     if (!prog || !dustProg) return;
 

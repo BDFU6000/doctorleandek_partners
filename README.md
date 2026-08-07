@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# دكتور لعندك — partners site
 
-## Getting Started
+The Arabic, RTL landing page that recruits partners (doctors, nurses, pharmacies, pharmacy staff,
+couriers, ambulance drivers) onto the platform. Next.js App Router, JavaScript, two dependencies
+(`next`, `react`), no UI library and no 3D library.
 
-First, run the development server:
+- `DESIGN_SYSTEM.md` is the authoritative design sheet: one hue, one typeface, the motion curves,
+  the artwork rules. Read it before changing anything visual.
+- `AGENTS.md` — this Next.js version has breaking changes; check `node_modules/next/dist/docs/`
+  rather than trusting older habits.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm run build   # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Live platform counters
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+The `#numbers` section shows three real figures from the platform's own database: partner
+pharmacies, verified medical staff, and active patient accounts.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Where they come from:** `app/lib/stats.js` calls `rpc_public_stats` (Supabase, migration
+  `doctorleandek_02/supabase/migrations/0076_public_stats.sql`) on the SERVER while the page
+  renders. The anon key never reaches the browser, the numbers are in the served HTML for crawlers
+  and for readers with JS off, and the count-up animation only ever replaces a correct value with
+  the same correct value.
+- **How fresh:** the backend recomputes the counts on a 15-minute cron into a single cached row, and
+  this page revalidates on the same 15 minutes. Nothing here ever runs a `COUNT(*)` per visit.
+- **When the backend is silent:** the section and its nav link are not rendered. It never shows
+  zeros and never shows a number that did not come from the database.
 
-## Learn More
+### Configuration
 
-To learn more about Next.js, take a look at the following resources:
+Both values default to the production project in `app/site-config.js`, so a fresh clone builds with
+no setup. Override them to point at another Supabase project:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Meaning |
+|---|---|
+| `SUPABASE_URL` | project URL, e.g. `https://<ref>.supabase.co` |
+| `SUPABASE_ANON_KEY` | the anon/publishable key — public by design, RLS is the wall |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Server-side only, so deliberately **not** prefixed `NEXT_PUBLIC_`. On Vercel add them under
+Settings → Environment Variables; locally put them in `.env.local`.
 
-## Deploy on Vercel
+## Deploying
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel, from this directory as the project root. The page is statically prerendered with a
+15-minute revalidate, so the counters refresh without a redeploy.

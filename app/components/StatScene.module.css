@@ -1,0 +1,34 @@
+/* The model's box inside a counter card. It sits above the card's glow and
+   below its text, and it is a square so the three objects share one stage. */
+
+.host {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 190px;
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+/* Added on the frame after the first draw, so the object arrives rather than
+   pops. No WebGL means the class is never added and nothing shows — the card's
+   own glow is what stands in. */
+.ready {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    transition: none;
+  }
+}

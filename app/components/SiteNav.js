@@ -18,18 +18,25 @@ import s from "./SiteNav.module.css";
    so it never looks like a bar bolted across the artwork.
    ───────────────────────────────────────────────────────────────────────────── */
 
-const LINKS = [
+const BASE_LINKS = [
   { href: "#roles", label: "من ينضم إلينا" },
   { href: "#benefits", label: "لماذا المنصة" },
   { href: "#how", label: "خطوات الانضمام" },
   { href: "#faq", label: "أسئلة شائعة" },
 ];
 
-export default function SiteNav() {
+/* `withNumbers` is passed by the page and is false when the backend did not
+   answer, because the counters section is then not on the page at all. A nav
+   link to an anchor that does not exist is a link that does nothing, and the
+   section observer below would be watching for an element that never arrives. */
+export default function SiteNav({ withNumbers = false }) {
   const [stuck, setStuck] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
   const panelRef = useRef(null);
+  const LINKS = withNumbers
+    ? [{ href: "#numbers", label: "أرقام المنصة" }, ...BASE_LINKS]
+    : BASE_LINKS;
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 28);
@@ -54,7 +61,7 @@ export default function SiteNav() {
     );
     targets.forEach((t) => io.observe(t));
     return () => io.disconnect();
-  }, []);
+  }, [withNumbers]);
 
   useEffect(() => {
     if (!open) return;

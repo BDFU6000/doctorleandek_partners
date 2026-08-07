@@ -1,9 +1,10 @@
 @AGENTS.md
+
 <!-- cloude-code-toolbox:mcp-skills-awareness-begin -->
 
 ### MCP & Skills awareness (Cloude Code ToolBox)
 
-_Last synced: 2026-07-31T23:29:17.070Z._
+_Last synced: 2026-08-07T12:20:30.037Z._
 
 - **Full report:** `.claude/cloude-code-toolbox-mcp-skills-awareness.md` in this workspace (auto-overwritten on each scan). Use it as ground truth for configured servers and skill folders.
 - **MCP:** For **live tools** in Claude Code, enable the matching server via `/mcp`. Servers are configured in `~/.claude.json` (user) and `.mcp.json` (project).
@@ -97,5 +98,7 @@ _None found (or no workspace open)._
 - **visual-verdict** — `C:\Users\hp\.claude\skills\visual-verdict` — Structured visual QA verdict for screenshot-to-reference comparisons
 
 - **x-writer** — `C:\Users\hp\.claude\skills\x-writer` — Creates viral X (Twitter) posts using proven formats, post templates, and creator voice matching. Use when user needs engaging, high-performing posts for X/Twitter.
+
+- **grill-me** — `C:\Users\hp\.agents\skills\grill-me` — A relentless interview to sharpen a plan or design.
 
 <!-- cloude-code-toolbox:mcp-skills-awareness-end -->

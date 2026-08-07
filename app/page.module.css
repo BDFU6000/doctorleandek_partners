@@ -501,6 +501,87 @@
   .benefit:nth-child(n + 3) { border-top: 1px solid var(--line); }
 }
 
+/* ── Live counters ────────────────────────────────────────────────────────── */
+/* Same construction as the roles grid: one hairline lattice, cards painted the
+   band colour, gaps drawn by the background showing through. Three cards, one
+   3D object each, and the number set at display size because the number is the
+   only reason the section exists. */
+.counters {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.counter {
+  position: relative;
+  background: var(--t-900);
+  padding: 34px 24px 30px;
+  text-align: center;
+  transition: background var(--e-slow);
+  isolation: isolate;
+}
+.counter:hover { background: var(--surface-hi); }
+
+/* The pool of light the model sits in. It is also the whole design of the card
+   when WebGL is missing, which is why it is a real element and not a shadow on
+   the canvas. */
+.counterGlow {
+  position: absolute;
+  inset-block-start: 14px;
+  inset-inline-start: 50%;
+  transform: translateX(50%);
+  width: 200px;
+  height: 200px;
+  max-width: 74%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(43, 145, 167, 0.34), transparent 68%);
+  filter: blur(46px);
+  z-index: -1;
+  transition: opacity var(--e-slow);
+  opacity: 0.85;
+}
+.counter:hover .counterGlow { opacity: 1; }
+
+.counterValue {
+  display: block;
+  margin-top: 6px;
+  font-size: clamp(40px, 5.4vw, 62px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--t-100);
+  /* Fixed digit widths: the count-up must not resize the card as it ticks. */
+  font-variant-numeric: tabular-nums;
+  transform: translateZ(30px);
+}
+.counterUnit {
+  margin-top: 12px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: var(--t-300);
+}
+.counterNote {
+  margin-top: 8px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+/* Provenance, in the smallest type on the page. A live number that will not say
+   when it was taken is just a number someone typed. */
+.countersMeta {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
 @media (max-width: 900px) {
   .hero, .split { grid-template-columns: 1fr; }
   .hero { text-align: center; padding-block-start: 24px; }
@@ -528,6 +609,10 @@
   .stepBody h3 { font-size: 18px; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat:nth-child(3) { grid-column: span 2; border-inline-start: 0; border-top: 1px solid var(--line); }
+  /* One counter per row on a phone: side by side, the model shrinks to a
+     thumbnail and the number it belongs to stops being the loud thing. */
+  .counters { grid-template-columns: 1fr; }
+  .counter { padding-block: 26px 24px; }
 }
 
 @media (max-width: 560px) {
