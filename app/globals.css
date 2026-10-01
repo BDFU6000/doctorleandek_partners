@@ -62,7 +62,11 @@
      made the old page read as a template. Buttons stay fully round because a
      pill CTA against square cards is the contrast that makes it a CTA. */
   --r-pill: 999px;
-  --r-card: 14px;
+  /* Raised from 14 in the 2026-10-01 upgrade. The roles and counters are now
+     separate cards with gaps between them (design/docs/02), and a separate
+     card at 14 reads as a tile; 20 is the sheet's own middle radius. */
+  --r-card: 20px;
+  --r-panel: 28px; /* the large contained panels: final CTA, nav capsule */
   --r-sm: 10px;
 
   /* ── ELEVATION ───────────────────────────────────────────────────────────
@@ -156,6 +160,9 @@ ol {
   font-weight: 800;
   line-height: 1.34;
   letter-spacing: -1px;
+  /* Balanced lines keep the accent phrase from ending as one orphan word on a
+     second line ("خمس / واجهات"). */
+  text-wrap: balance;
 }
 .bodyLarge {
   font-size: clamp(16px, 1.35vw, 18px);
@@ -167,6 +174,40 @@ ol {
   font-size: 14px;
   font-weight: 400;
   line-height: 1.85;
+}
+
+/* One accent phrase per headline, the rest stays white. Taken from Function
+   Health's "Monitor early indicators of 1000s of diseases": colour on the
+   phrase that carries the promise, never on a whole line. Always split on a
+   word boundary so Arabic joining is never broken by the span. */
+.accent {
+  color: var(--t-300);
+}
+
+/* Hairline orbit rings. Our version of the hexagon lattice on the Tamayoz
+   site: a motif taken from the brand, drawn at hairline weight and faded out
+   with a mask so it never ends in a hard edge. The rings echo the orbit the
+   five satellites travel in the hero. Set --rings-at to move the centre. */
+.rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-radial-gradient(
+    circle at var(--rings-at, 50% 50%),
+    transparent 0 71px,
+    rgba(84, 172, 191, 0.11) 71px 72px
+  );
+  -webkit-mask-image: radial-gradient(
+    var(--rings-size, 620px 520px) at var(--rings-at, 50% 50%),
+    #000 25%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(
+    var(--rings-size, 620px 520px) at var(--rings-at, 50% 50%),
+    #000 25%,
+    transparent 72%
+  );
 }
 
 /* Section label: index numeral, hairline, spaced caption. Straight from the

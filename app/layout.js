@@ -1,6 +1,7 @@
 import { Cairo } from "next/font/google";
 import "./globals.css";
 import { SITE } from "./site-config";
+import LangGuard from "./components/LangGuard";
 
 // Cairo is the sheet's typeface. next/font self-hosts it at build time, so this
 // costs no external request and cannot be blocked by a strict CSP later.
@@ -12,25 +13,25 @@ const cairo = Cairo({
 
 export const metadata = {
   metadataBase: new URL(SITE.partnersUrl),
-  title: "انضم إلى دكتور لعندك | فرص للأطباء والصيدليات ومقدمي الخدمة في ليبيا",
+  title: "دكتور لعندك | منصة رعاية صحية ليبية: طبيب ودواء وإسعاف في تطبيق واحد",
   description:
-    "سجّل كطبيب أو ممرض أو صيدلية أو مندوب توصيل أو سائق إسعاف في منصة دكتور لعندك، واستقبل طلبات الرعاية المنزلية والأدوية والطوارئ من تطبيق واحد.",
+    "دكتور لعندك منصة رعاية صحية ليبية توصل الطبيب والممرض والدواء والإسعاف إلى باب المريض، عبر تطبيق واحد ومحفظة واحدة وسجل طبي واحد. تعرّف علينا وانضم كشريك.",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    siteName: "دكتور لعندك للشركاء",
+    siteName: "دكتور لعندك",
     locale: "ar_LY",
     url: "/",
-    title: "انضم إلى شبكة دكتور لعندك",
+    title: "دكتور لعندك | الرعاية الصحية تصل إلى بابك",
     description:
-      "استقبل طلبات الزيارات المنزلية والأدوية والطوارئ، وأدر عملك من لوحة تحكم واحدة.",
+      "طبيب وممرض ودواء وإسعاف عبر تطبيق واحد ومحفظة واحدة وسجل طبي واحد.",
     images: [{ url: "/render/og.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "انضم إلى شبكة دكتور لعندك",
+    title: "دكتور لعندك | الرعاية الصحية تصل إلى بابك",
     description:
-      "استقبل طلبات الزيارات المنزلية والأدوية والطوارئ، وأدر عملك من لوحة تحكم واحدة.",
+      "طبيب وممرض ودواء وإسعاف عبر تطبيق واحد ومحفظة واحدة وسجل طبي واحد.",
     images: ["/render/og.jpg"],
   },
   robots: { index: true, follow: true },
@@ -51,8 +52,21 @@ export default function RootLayout({ children }) {
     // overriding a global `scroll-behavior: smooth` during navigation, and
     // without this attribute an in-app navigation would smooth-scroll to the
     // top instead of arriving there.
-    <html lang="ar" dir="rtl" className={cairo.className} data-scroll-behavior="smooth">
+    // suppressHydrationWarning covers this one element's attributes only, not
+    // its children. Extensions rewrite lang/dir before hydration (see
+    // LangGuard), and that is not a mismatch in our own render.
+    <html
+      lang="ar"
+      dir="rtl"
+      translate="no"
+      className={cairo.className}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
+        {/* The page is already Arabic for an Arabic audience; an automatic
+            translation pass is what flips lang and dir in the first place. */}
+        <meta name="google" content="notranslate" />
         {/* The scroll-reveal system starts every animated element at zero
             opacity, which is correct only if the script that reveals them can
             run. Without JavaScript there is no observer and the page would be
@@ -61,7 +75,10 @@ export default function RootLayout({ children }) {
           <style>{`[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
         </noscript>
       </head>
-      <body>{children}</body>
+      <body>
+        <LangGuard />
+        {children}
+      </body>
     </html>
   );
 }

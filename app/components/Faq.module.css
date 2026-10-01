@@ -68,6 +68,9 @@
   background: var(--surface-hi);
   transform: scale(1.12);
 }
+/* Each node is its own stacking layer, so the open one must sit above its
+   neighbours or their dots draw on top of its card. */
+.nodeActive { z-index: 20; }
 .nodeActive .nodeDot {
   background: var(--t-500);
   border-color: var(--t-500);
@@ -125,36 +128,40 @@
   transform: translateX(-50%) translateY(0) scale(1);
 }
 
+/* nth-of-type, not nth-child: the edges <svg> is the network's first child,
+   so nth-child counted one off and every edge rule landed on the neighbouring
+   node, which pushed the edge cards off screen on a phone. */
+
 /* Nodes near the bottom: flip card above the dot */
-.node:nth-child(n+4) .nodeCard {
+.node:nth-of-type(n+4) .nodeCard {
   top: auto;
   bottom: calc(100% + 12px);
   transform: translateX(-50%) translateY(8px) scale(0.96);
 }
-.node:nth-child(n+4) .nodeCardOpen {
+.node:nth-of-type(n+4) .nodeCardOpen {
   transform: translateX(-50%) translateY(0) scale(1);
 }
 
 /* Nodes on the right edge: shift card leftward */
-.node:nth-child(2) .nodeCard,
-.node:nth-child(3) .nodeCard {
+.node:nth-of-type(2) .nodeCard,
+.node:nth-of-type(3) .nodeCard {
   left: auto;
   right: 0;
   transform: translateX(0) translateY(-8px) scale(0.96);
 }
-.node:nth-child(2) .nodeCardOpen,
-.node:nth-child(3) .nodeCardOpen {
+.node:nth-of-type(2) .nodeCardOpen,
+.node:nth-of-type(3) .nodeCardOpen {
   transform: translateX(0) translateY(0) scale(1);
 }
 
 /* Nodes on the left edge: shift card rightward */
-.node:nth-child(5) .nodeCard,
-.node:nth-child(6) .nodeCard {
+.node:nth-of-type(5) .nodeCard,
+.node:nth-of-type(6) .nodeCard {
   left: 0;
   transform: translateX(0) translateY(-8px) scale(0.96);
 }
-.node:nth-child(5) .nodeCardOpen,
-.node:nth-child(6) .nodeCardOpen {
+.node:nth-of-type(5) .nodeCardOpen,
+.node:nth-of-type(6) .nodeCardOpen {
   transform: translateX(0) translateY(0) scale(1);
 }
 

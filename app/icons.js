@@ -99,6 +99,87 @@ export function IconCheck() {
   );
 }
 
+/** A house with a crescent over the door: the home visit. */
+export function IconHome() {
+  return (
+    <svg {...base}>
+      <path d="M3.4 10.6 12 3.6l8.6 7" />
+      <path d="M5.6 9v10.6a1 1 0 0 0 1 1h10.8a1 1 0 0 0 1-1V9" />
+      <path d="M10 20.6v-5.2h4v5.2" />
+      <path d={CRESCENT_PATH} transform={crescentAt(12, 11.4, 4.6)} />
+    </svg>
+  );
+}
+
+export function IconWallet() {
+  return (
+    <svg {...base}>
+      <path d="M3.6 7.2h15.2a1.6 1.6 0 0 1 1.6 1.6v9.6a1.6 1.6 0 0 1-1.6 1.6H5.2a1.6 1.6 0 0 1-1.6-1.6Z" />
+      <path d="M3.6 7.2 15.4 3.8v3.4" />
+      <path d="M16.2 13.6h4.2" />
+    </svg>
+  );
+}
+
+/** The medical record: a sheet with lines and a folded corner. */
+export function IconRecord() {
+  return (
+    <svg {...base}>
+      <path d="M6 2.8h8.2l4 4v13.6a.8.8 0 0 1-.8.8H6a.8.8 0 0 1-.8-.8V3.6a.8.8 0 0 1 .8-.8Z" />
+      <path d="M14 2.8v4.2h4.2" />
+      <path d="M8.4 11.6h7.2M8.4 15h7.2M8.4 18.4h4.4" />
+    </svg>
+  );
+}
+
+export function IconShield() {
+  return (
+    <svg {...base}>
+      <path d="M12 2.8 4.6 5.6v5.8c0 4.6 3.1 8.4 7.4 9.8 4.3-1.4 7.4-5.2 7.4-9.8V5.6Z" />
+      <path d="m8.8 12 2.2 2.2 4.2-4.4" />
+    </svg>
+  );
+}
+
+export function IconPhone() {
+  return (
+    <svg {...base}>
+      <path d="M5.2 3.4h3.2l1.6 4-2 1.3a10.4 10.4 0 0 0 5.3 5.3l1.3-2 4 1.6v3.2a1.6 1.6 0 0 1-1.7 1.6A15.6 15.6 0 0 1 3.6 5.1a1.6 1.6 0 0 1 1.6-1.7Z" />
+    </svg>
+  );
+}
+
+/** A speech bubble, for WhatsApp. Not the WhatsApp logo: brand marks carry
+    their own green, which the single-hue palette cannot hold. */
+export function IconChat() {
+  return (
+    <svg {...base}>
+      <path d="M4 18.8 5.2 15A7.8 7.8 0 1 1 8.6 18.2Z" />
+      <path d="M9 10.4h6.2M9 13.4h4" />
+    </svg>
+  );
+}
+
+export function IconDownload() {
+  return (
+    <svg {...base}>
+      <path d="M12 3.6v11.6" />
+      <path d="m7.4 10.8 4.6 4.6 4.6-4.6" />
+      <path d="M4.4 16.6v2.4a1.4 1.4 0 0 0 1.4 1.4h12.4a1.4 1.4 0 0 0 1.4-1.4v-2.4" />
+    </svg>
+  );
+}
+
+/** A small arrow pointing along the reading direction (left, in RTL). */
+export function IconArrow() {
+  return (
+    <svg {...base}>
+      <path d="M19 12H5.4" />
+      <path d="m10.6 6.6-5.4 5.4 5.4 5.4" />
+    </svg>
+  );
+}
+
 /** The badge mark. Replaces the plus that used to sit here. */
 export function IconCrescent() {
   return (

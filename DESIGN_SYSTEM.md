@@ -79,9 +79,16 @@ Taken from the editorial kits in `website Stlyes brainstorming/UI kits`:
 
 - **Bands, not cards.** Sections alternate `--t-900` / `--t-950` and are divided by a single
   hairline. Nothing floats on a gradient.
-- **Hairlines do the dividing.** The roles grid is a real table — the container owns the border and
-  1px gaps show `--line` through. The 6-column track with spans of 2 and 3 fills exactly, which is
-  why five cards never leave a hole.
+- **Choices are separate cards** (2026-10-01 upgrade, `design/docs/02-design-direction.md`). The
+  roles and the live counters are separate rounded cards with 18px gaps, the pattern the Awwwards
+  health references share for anything the visitor picks between. The 6-column roles track with
+  spans of 2 and 3 still fills exactly, so five cards never leave a hole. Hairlines still divide the
+  benefits columns, the proof strip and the check lists.
+- **The nav floats.** Over the hero it sits straight on the canvas; once scrolled, the inner row
+  becomes a glass capsule inset from the viewport edges.
+- **One accent phrase per headline** (`.accent`, `--t-300`), always split on a word boundary.
+- **Orbit rings** (`.rings`) are the brand motif at hairline weight, centred on the hero emblem and
+  repeated in the final CTA panel.
 - **Index numerals on everything countable** (`01`…), Latin throughout.
 - **The joining steps are a vertical road**, not four cards in a row: a dashed line running down
   through the numbers, with the teal filling in behind you as each step scrolls into view. Every
@@ -95,7 +102,7 @@ Taken from the editorial kits in `website Stlyes brainstorming/UI kits`:
 
 | Property | Value |
 |---|---|
-| Radius | Buttons `999px` (pill) · Cards `14px` · Small `10px` |
+| Radius | Buttons `999px` (pill) · Cards `20px` · Panels `28px` · Small `10px` |
 | Elevation | `--shadow` / `--shadow-lg` / `--shadow-glow`, plus `--edge` top highlight |
 | Buttons | height `56px`, flat `--t-500` fill |
 | Surfaces | `.panel` — hairline, 5% fill, top-edge highlight. No backdrop blur. |

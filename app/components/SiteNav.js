@@ -18,25 +18,21 @@ import s from "./SiteNav.module.css";
    so it never looks like a bar bolted across the artwork.
    ───────────────────────────────────────────────────────────────────────────── */
 
-const BASE_LINKS = [
-  { href: "#roles", label: "من ينضم إلينا" },
-  { href: "#benefits", label: "لماذا المنصة" },
-  { href: "#how", label: "خطوات الانضمام" },
+// The company profile's five chapters. The live numbers sit directly under
+// the hero, so they need no link of their own, and contact is the ghost button.
+const LINKS = [
+  { href: "#about", label: "من نحن" },
+  { href: "#services", label: "خدماتنا" },
+  { href: "#how", label: "كيف تعمل" },
+  { href: "#partners", label: "شركاؤنا" },
   { href: "#faq", label: "أسئلة شائعة" },
 ];
 
-/* `withNumbers` is passed by the page and is false when the backend did not
-   answer, because the counters section is then not on the page at all. A nav
-   link to an anchor that does not exist is a link that does nothing, and the
-   section observer below would be watching for an element that never arrives. */
-export default function SiteNav({ withNumbers = false }) {
+export default function SiteNav() {
   const [stuck, setStuck] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
   const panelRef = useRef(null);
-  const LINKS = withNumbers
-    ? [{ href: "#numbers", label: "أرقام المنصة" }, ...BASE_LINKS]
-    : BASE_LINKS;
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 28);
@@ -61,7 +57,7 @@ export default function SiteNav({ withNumbers = false }) {
     );
     targets.forEach((t) => io.observe(t));
     return () => io.disconnect();
-  }, [withNumbers]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -106,11 +102,11 @@ export default function SiteNav({ withNumbers = false }) {
           </nav>
 
           <div className={s.actions}>
-            <a className={s.ghostCta} href={SITE.mainUrl}>
-              موقع المرضى
+            <a className={s.ghostCta} href="#contact">
+              تواصل معنا
             </a>
             <a className={s.solidCta} href={SITE.appUrl}>
-              سجّل الآن
+              افتح التطبيق
             </a>
             <button
               type="button"
@@ -142,15 +138,15 @@ export default function SiteNav({ withNumbers = false }) {
             </a>
           ))}
           <a
-            href={SITE.mainUrl}
+            href="#contact"
             style={{ "--i": LINKS.length }}
             onClick={() => setOpen(false)}
           >
-            موقع المرضى
+            تواصل معنا
           </a>
         </nav>
         <a className={`btn btnLight btnFull ${s.panelCta}`} href={SITE.appUrl}>
-          سجّل حسابك الآن
+          افتح التطبيق
         </a>
       </div>
     </>

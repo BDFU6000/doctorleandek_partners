@@ -1,0 +1,257 @@
+/* "كيف تعمل". Every value comes from the ramp in globals.css. Logical
+   properties throughout, so "start" is the right edge in this RTL page. */
+
+.how {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  /* First column is the RIGHT one in RTL: the steps are read first. */
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(32px, 5vw, 88px);
+  align-items: start;
+}
+
+/* ── Steps ────────────────────────────────────────────────────────────────── */
+.list { display: grid; }
+
+.step {
+  --dot: 48px;
+  position: relative;
+  /* Tall enough that each step holds the sticky phone for a while. */
+  min-height: 44vh;
+  padding-inline-start: calc(var(--dot) + 26px);
+  padding-block-end: 40px;
+  opacity: 0.42;
+  transition: opacity var(--e-slow);
+}
+.step[data-active],
+.step[data-done] { opacity: 1; }
+/* The last step keeps its height too: the phone stays pinned only while the
+   list beside it continues, so a short last step would let the phone scroll
+   away while step 4 is still being read. */
+.step:last-child { padding-block-end: 0; min-height: 62vh; }
+
+/* The rail: one segment per step, from this dot down to the next. The fill
+   runs top to bottom, which is the reading direction of a vertical list in
+   any script. It sits on the inline-start edge, the right in Arabic. */
+.step::before,
+.step::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: calc(var(--dot) / 2 - 1px);
+  inset-block-start: calc(var(--dot) + 8px);
+  inset-block-end: 8px;
+  width: 2px;
+  border-radius: 2px;
+}
+.step::before { background: var(--line); }
+.step::after {
+  background: var(--t-500);
+  box-shadow: 0 0 12px rgba(84, 172, 191, 0.5);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.step[data-done]::after { transform: scaleY(1); }
+.step:last-child::before,
+.step:last-child::after { display: none; }
+
+.dot {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--t-900);
+  border: 1px solid var(--line-hi);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--e-slow), color var(--e-slow), border-color var(--e-slow),
+    box-shadow var(--e-slow);
+}
+.step[data-done] .dot { border-color: var(--t-500); color: var(--t-100); }
+.step[data-active] .dot {
+  background: var(--t-500);
+  border-color: var(--t-500);
+  color: var(--t-950);
+  box-shadow: 0 0 0 6px rgba(43, 145, 167, 0.16), var(--shadow-glow);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 11px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--t-300);
+}
+.tag i { width: 4px; height: 4px; border-radius: 50%; background: var(--t-500); }
+
+.step h3 {
+  margin: 8px 0 8px;
+  font-size: clamp(21px, 2.2vw, 28px);
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.4px;
+}
+.step > p { font-size: 16px; color: var(--ink-2); max-width: 40ch; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.chips li {
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--t-200);
+}
+
+/* ── Sticky phone (desktop) ───────────────────────────────────────────────── */
+/* The stage is exactly the phone's height and is pinned so the phone sits in
+   the middle of the screen (never under the nav). Being no taller than the
+   phone is what keeps it pinned until the last step, instead of scrolling
+   away while the reader is still on step 4. */
+.stage {
+  position: sticky;
+  top: max(calc(var(--nav-h) + 16px), calc(50vh - 320px));
+  display: flex;
+  justify-content: center;
+}
+.stageInner { position: relative; }
+.glow {
+  position: absolute;
+  inset: 8% -18%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(43, 145, 167, 0.34), transparent 66%);
+  filter: blur(60px);
+  z-index: -1;
+}
+
+.phone {
+  --pw: 280px;
+  position: relative;
+  width: var(--pw);
+  /* The recording is 396x836. Screen width (pw minus the 2x12 bezel) times
+     836/396, plus the bezel, gives the body height with no crop. */
+  height: calc((var(--pw) - 24px) * 2.111 + 24px);
+  border-radius: 44px;
+  padding: 12px;
+  background: linear-gradient(160deg, var(--t-800), var(--t-950) 60%);
+  border: 1px solid var(--line-hi);
+  box-shadow: var(--shadow-lg), var(--edge), inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+}
+/* Screens cross-fade and drift up a little, so the change reads as the app
+   moving on to its next screen rather than a slide swapping. */
+.screen,
+.miniPhone {
+  border-radius: 32px;
+  background: var(--t-950);
+  overflow: hidden;
+}
+.shot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.screen {
+  position: absolute;
+  inset: 12px;
+  opacity: 0;
+  transform: translateY(14px) scale(0.985);
+  transition: opacity 0.45s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.screen[data-on] { opacity: 1; transform: none; }
+
+/* The floating notification, overlapping the phone's edge. It hangs off the
+   inline-start side (the right in Arabic), into the gap toward the steps, so
+   it visually ties the screen to the step that caused it. */
+.toast {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: 9%;
+  inset-inline-start: -150px;
+  width: 236px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(6, 15, 19, 0.88);
+  border: 1px solid var(--line-hi);
+  box-shadow: var(--shadow-lg), var(--edge);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  transition: opacity 0.4s ease 0.15s, transform 0.55s cubic-bezier(0.34, 1.36, 0.5, 1) 0.15s;
+}
+.toast[data-on] { opacity: 1; transform: none; }
+.toast small { display: block; font-size: 10.5px; color: var(--ink-3); line-height: 1.5; }
+.toast b { display: block; font-size: 13px; line-height: 1.55; }
+.toastIcon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--t-500);
+  color: var(--t-950);
+}
+.toastIcon svg { width: 16px; height: 16px; }
+
+.progress {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+}
+.progress i {
+  width: 22px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--line-hi);
+  transition: background var(--e-slow), width var(--e-slow);
+}
+.progress i[data-on] { background: var(--t-500); }
+
+/* ── Inline screens (phone layouts) ───────────────────────────────────────── */
+.inlineShot { display: none; }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .how { grid-template-columns: 1fr; }
+  .stage { display: none; }
+  .step { min-height: 0; opacity: 1; padding-block-end: 48px; }
+  .inlineShot { display: block; margin-top: 20px; }
+  /* A light bezel around the real screen, so it still reads as a phone. */
+  .miniPhone {
+    width: min(100%, 240px);
+    padding: 8px;
+    border-radius: 30px;
+    background: linear-gradient(160deg, var(--t-800), var(--t-950) 60%);
+    border: 1px solid var(--line-hi);
+    box-shadow: var(--shadow), var(--edge);
+  }
+  .miniPhone .shot { border-radius: 22px; height: auto; }
+}
+@media (max-width: 640px) {
+  .step { --dot: 40px; padding-inline-start: calc(var(--dot) + 16px); }
+  .dot { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen, .toast { transition: none; }
+}

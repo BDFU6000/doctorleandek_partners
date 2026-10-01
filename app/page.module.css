@@ -33,6 +33,9 @@
 }
 
 .stageInner { position: relative; z-index: 1; }
+/* The orbit rings sit on the emblem's centre, so the satellites in the WebGL
+   orbit look like they travel along lines already drawn on the page. */
+.stageRings { --rings-at: 26% 46%; --rings-size: 700px 620px; }
 
 .hero {
   display: grid;
@@ -56,11 +59,15 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin-top: 44px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  /* A contained strip rather than two loose rules: Function Health ends its
+     hero on the same kind of hairline-divided proof row. */
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--edge);
 }
-.stat { padding: 20px 8px 18px; }
-.stat + .stat { border-inline-start: 1px solid var(--line); padding-inline-start: 20px; }
+.stat { padding: 18px 22px 16px; }
+.stat + .stat { border-inline-start: 1px solid var(--line); }
 .stat b {
   display: block;
   font-size: clamp(26px, 3vw, 38px);
@@ -162,6 +169,8 @@
   padding: 8px 18px;
   border-radius: var(--r-pill);
   border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--edge);
   font-size: 13.5px;
   font-weight: 600;
   letter-spacing: .3px;
@@ -171,31 +180,32 @@
 .tickerItem svg { width: 17px; height: 17px; color: var(--t-400); flex: 0 0 auto; }
 
 /* ── Roles ────────────────────────────────────────────────────────────────
-   A real grid, not five floating cards: the container owns the border and the
-   1px gaps show the line colour through, so the whole block reads as one
-   table. The 6-column track with spans of 2 and 3 fills exactly, which is why
-   there is never a hole where a sixth card would be. */
+   Five separate cards with real gaps (HEVA's path cards, Photon's feature
+   cards). These are choices the visitor picks between, and separate cards say
+   "pick one" where one table said "read all". The 6-column track with spans of
+   2 and 3 still fills exactly, so there is never a hole where a sixth card
+   would be. */
 .roles {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  overflow: hidden;
+  gap: 18px;
 }
 .role {
   grid-column: span 2;
-  background: var(--t-900);
-  padding: 32px 28px 30px;
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface) 46%);
+  background-color: var(--t-900);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--edge);
+  padding: 30px 28px 28px;
   display: flex;
   flex-direction: column;
-  transition: background var(--e-slow);
+  transition: border-color var(--e-slow), box-shadow var(--e-slow);
 }
 .role:nth-child(4), .role:nth-child(5) { grid-column: span 3; }
-.role:hover { background: var(--surface-hi); }
+.role:hover { border-color: var(--line-hi); box-shadow: var(--shadow-lg), var(--edge); }
 
 .roleTop {
   display: flex;
@@ -219,19 +229,36 @@
 .roleIcon svg { width: 23px; height: 23px; }
 .role:hover .roleIcon { background: var(--t-500); border-color: var(--t-500); color: var(--t-950); }
 
+/* The index as a tag chip (Photon's topic chips), so it reads as a label on
+   the card rather than a stray number in the corner. */
 .roleNo {
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--t-700);
-  transition: color var(--e-slow);
+  line-height: 1;
+  letter-spacing: 1.5px;
+  color: var(--t-300);
+  transition: color var(--e-slow), border-color var(--e-slow);
 }
-.role:hover .roleNo { color: var(--t-400); }
+.roleNo::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--t-500);
+}
+.role:hover .roleNo { color: var(--t-100); border-color: var(--line-hi); }
 
 /* Emergency is a signal, not a theme. It appears here and nowhere else. */
 .urgent .roleIcon { color: var(--danger); border-color: rgba(199, 25, 28, 0.45); }
 .urgent:hover .roleIcon { background: var(--danger); border-color: var(--danger); color: var(--white); }
-.urgent:hover .roleNo { color: var(--danger); }
+.urgent .roleNo::before { background: var(--danger); }
 
 .role h3 { font-size: 21px; font-weight: 800; margin-bottom: 10px; letter-spacing: -.3px; }
 .role > p { color: var(--ink-2); font-size: 15px; margin-bottom: 22px; }
@@ -249,7 +276,20 @@
   grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid var(--line);
 }
-.benefit { padding: 40px 26px 8px; }
+.benefit { position: relative; padding: 40px 26px 8px; }
+/* A short accent bar riding the top rule, which runs the full width on hover. */
+.benefit::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -1px;
+  inset-inline: 0;
+  height: 2px;
+  background: var(--t-500);
+  transform: scaleX(0.18);
+  transform-origin: right center;
+  transition: transform var(--e-slow);
+}
+.benefit:hover::before { transform: scaleX(1); }
 .benefit + .benefit { border-inline-start: 1px solid var(--line); }
 .benefitNo {
   display: block;
@@ -295,120 +335,47 @@
 
 .splitTxt h3 { margin-bottom: 18px; }
 .splitTxt > p { margin-bottom: 26px; }
-.checks { display: grid; }
+.checks {
+  display: grid;
+  padding-inline: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--edge);
+}
 .checks li {
   display: flex;
   gap: 12px;
   font-size: 15px;
   line-height: 1.7;
   color: var(--ink-2);
-  padding-block: 14px;
-  border-top: 1px solid var(--line);
+  padding-block: 15px;
 }
-.checks li:last-child { border-bottom: 1px solid var(--line); }
+.checks li + li { border-top: 1px solid var(--line); }
 .checks svg { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 6px; color: var(--t-500); }
-
-/* ── Steps — zigzag road ──────────────────────────────────────────────────
-   Three-column grid: [content] [spine=dot width] [content].
-   Each <li> is itself a 3-col sub-grid so dot + body share the same tracks.
-   The connector lives in a dedicated row-2 spine cell so it is a normal flow
-   child — no absolute positioning, no measurement needed. */
-.steps {
-  --rail: 56px;
-  --gap: 28px;
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr var(--rail) 1fr;
-}
-
-.step {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1fr var(--rail) 1fr;
-  grid-template-rows: auto auto;
-  column-gap: var(--gap);
-}
-
-/* Dot always in the centre spine column, row 1 */
-.stepNo {
-  grid-column: 2;
-  grid-row: 1;
-  position: relative;
-  z-index: 1;
-  width: var(--rail);
-  height: var(--rail);
-  border-radius: 50%;
-  background: var(--t-900);
-  border: 1px solid var(--line-hi);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 18px;
-  color: var(--ink-2);
-  font-variant-numeric: tabular-nums;
-  transition: background var(--e-slow), color var(--e-slow), border-color var(--e-slow),
-    box-shadow var(--e-slow);
-}
-.step[data-revealed] .stepNo { border-color: var(--t-500); color: var(--t-100); }
-.step:hover .stepNo {
-  background: var(--t-500);
-  border-color: var(--t-500);
-  color: var(--t-950);
-  box-shadow: var(--shadow-glow);
-}
-
-/* Body: odd steps → right col; even steps → left col */
-.stepBody {
-  grid-row: 1;
-  padding-top: 9px;
-}
-.step:nth-child(odd)  .stepBody { grid-column: 3; }
-.step:nth-child(even) .stepBody { grid-column: 1; text-align: end; }
-
-.stepBody h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.2px; }
-.stepBody p  { color: var(--ink-2); font-size: 15px; max-width: 38ch; }
-
-/* Connector: spine column, row 2. A fixed-height block that the SVG fills
-   completely — no absolute positioning, so top and bottom are exact. */
-.stepConnector {
-  grid-column: 2;
-  grid-row: 2;
-  height: clamp(72px, 8vw, 120px);
-  display: flex;
-  align-items: stretch;
-}
-
-.stepWave {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  display: block;
-}
-.waveBase,
-.waveFill {
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 9 9;
-  vector-effect: non-scaling-stroke;
-}
-.waveBase { stroke: var(--line); }
-
-.waveFill {
-  stroke: var(--t-500);
-  clip-path: inset(0 0 100% 0);
-  transition: clip-path 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: calc(var(--i, 0) * 75ms + 260ms);
-}
-.step[data-revealed] .waveFill { clip-path: inset(0 0 0 0); }
 
 /* ── Final CTA ────────────────────────────────────────────────────────────── */
 .finalWrap { position: relative; overflow: hidden; text-align: center; }
 .finalWrap > div { position: relative; z-index: 1; }
 .finalWrap h2 { max-width: 20ch; margin-inline: auto; }
+
+/* The closing block as one contained panel (HEVA, Photon), with the same orbit
+   rings as the hero so the page ends on the motif it opened with. */
+.finalPanel {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  max-width: 1000px;
+  margin-inline: auto;
+  padding: clamp(44px, 6vw, 76px) clamp(20px, 4vw, 56px);
+  border-radius: var(--r-panel);
+  border: 1px solid var(--line-hi);
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface) 60%);
+  background-color: var(--t-900);
+  box-shadow: var(--shadow-lg), var(--edge);
+}
+.finalPanel > :not(.finalRings) { position: relative; z-index: 1; }
+.finalRings { --rings-at: 50% 22%; --rings-size: 760px 560px; }
 
 /* The Red Crescent, closing the page. Deliberately smaller than the hero
    figure — it is a sign-off, not a second hero. */
@@ -445,7 +412,7 @@
 .footer { background: var(--t-950); border-top: 1px solid var(--line); padding-block: 64px 32px; }
 .footerGrid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
   gap: 40px;
   padding-bottom: 44px;
 }
@@ -477,6 +444,283 @@
   color: var(--ink-3);
 }
 
+/* ═════════════════════════════════════════════════════════════════════════════
+   COMPANY PROFILE BLOCKS (2026-10-01)
+   Built from the same pieces as the rest of the page: hairlines, the --surface
+   fill, the --edge highlight, one accent. Nothing here declares a hex.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* Sub-heading inside a section, used where one section holds two groups. */
+.subHead {
+  font-size: clamp(19px, 1.9vw, 24px);
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: clamp(56px, 6vw, 80px) 0 4px;
+}
+
+/* ── 01 About ─────────────────────────────────────────────────────────────── */
+.about {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+}
+.aboutStory { display: grid; gap: 22px; }
+
+/* The founding observation, set as the loudest text in the section. */
+.quote {
+  position: relative;
+  padding-inline-start: 26px;
+  border-inline-start: 2px solid var(--t-500);
+}
+.quote svg {
+  width: 26px;
+  height: 26px;
+  color: var(--t-400);
+  margin-bottom: 14px;
+}
+.quote p {
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: -0.4px;
+  color: var(--t-50);
+}
+.idea {
+  font-size: 15.5px;
+  line-height: 1.9;
+  color: var(--t-200);
+  padding: 18px 22px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.aboutSide { display: grid; gap: 16px; }
+.problemCard,
+.answerCard {
+  padding: 26px 26px 22px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface) 60%);
+  background-color: var(--t-950);
+  box-shadow: var(--edge);
+}
+.problemCard h3,
+.answerCard h3 { font-size: 17px; font-weight: 800; margin-bottom: 14px; }
+.problemCard ol { display: grid; }
+.problemCard li {
+  display: flex;
+  gap: 14px;
+  padding-block: 12px;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--ink-2);
+}
+.problemCard li + li { border-top: 1px solid var(--line); }
+.problemCard li b {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--t-500);
+  padding-top: 3px;
+}
+/* The answer is the one card in the section that carries the accent fill. */
+.answerCard {
+  border-color: var(--t-600);
+  background: linear-gradient(180deg, rgba(43, 145, 167, 0.2), rgba(43, 145, 167, 0.06));
+}
+.answerCard h3 { color: var(--t-200); }
+.answerCard p { font-size: 15px; line-height: 1.9; color: var(--t-100); }
+
+/* ── 02 Vision & mission ──────────────────────────────────────────────────── */
+.vmGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.vmCard {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(28px, 3.4vw, 44px);
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface) 60%);
+  box-shadow: var(--edge);
+}
+.vmCard p {
+  font-size: clamp(17px, 1.6vw, 21px);
+  font-weight: 600;
+  line-height: 1.85;
+  color: var(--t-50);
+}
+.vmTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-hi);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--t-300);
+}
+.vmTag::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--t-500);
+}
+
+/* ── 03 Services ──────────────────────────────────────────────────────────── */
+.services {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+/* A service card is a role card without the bullet list. */
+.service { grid-column: auto !important; }
+.service > p { margin-bottom: 0; }
+
+.chainSplit { margin-top: clamp(72px, 8vw, 120px); }
+
+/* The chain: five linked nodes, wrapping as a phrase would. */
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 6px;
+  margin-bottom: 26px;
+}
+.chain li { display: inline-flex; align-items: center; gap: 6px; }
+.chainNode {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-hi);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--t-100);
+  white-space: nowrap;
+}
+.chainNode svg { width: 16px; height: 16px; color: var(--t-400); }
+.chainArrow { display: inline-flex; color: var(--t-600); }
+.chainArrow svg { width: 16px; height: 16px; }
+
+.chainPoints {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.chainPoint {
+  display: flex;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.chainPoint > svg { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 4px; color: var(--t-500); }
+.chainPoint h4 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.chainPoint p { font-size: 13.5px; line-height: 1.75; color: var(--ink-2); }
+
+/* ── 05 Partners CTA ──────────────────────────────────────────────────────── */
+.partnerCta {
+  margin-top: clamp(40px, 5vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 28px;
+  flex-wrap: wrap;
+  padding: 22px 26px;
+  border-radius: var(--r-panel);
+  border: 1px solid var(--line-hi);
+  background: var(--surface);
+  box-shadow: var(--edge);
+}
+.partnerCta p { font-size: 16px; font-weight: 600; color: var(--t-100); }
+
+/* ── 07 Roadmap ───────────────────────────────────────────────────────────── */
+.roadmap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+/* Dashed borders on purpose: these are plans, and a dashed edge is the
+   page's way of saying "not built yet" next to the solid cards that are. */
+.roadItem {
+  padding: 24px 24px 22px;
+  border-radius: var(--r-card);
+  border: 1px dashed var(--line-hi);
+  transition: border-color var(--e-slow), background var(--e-slow);
+}
+.roadItem:hover { border-color: var(--t-500); background: var(--surface); }
+.roadItem h3 { font-size: 17.5px; font-weight: 800; margin: 14px 0 6px; }
+.roadItem p { font-size: 14.5px; color: var(--ink-2); }
+.soon {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--surface-hi);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--t-300);
+}
+
+/* ── Contact ──────────────────────────────────────────────────────────────── */
+.contactRow {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -10px 0 28px;
+}
+.contactChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-hi);
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--t-100);
+  transition: border-color var(--e-fast), background var(--e-fast);
+}
+.contactChip:hover { border-color: var(--t-400); background: var(--surface-hi); }
+.contactChip svg { width: 17px; height: 17px; color: var(--t-400); }
+.finalCtas svg { width: 18px; height: 18px; }
+/* The number runs LTR, but its box must still line up with the RTL column
+   beside it. The site is Arabic only, so a physical right is correct here. */
+.footerPhone { text-align: right; }
+
+@media (max-width: 1080px) {
+  .services { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .roadmap { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .about, .vmGrid { grid-template-columns: 1fr; }
+  .chainSplit .splitArt { order: 2; }
+}
+@media (max-width: 640px) {
+  .services, .roadmap, .chainPoints { grid-template-columns: 1fr; }
+  .partnerCta { justify-content: center; text-align: center; }
+  .partnerCta .btn { width: 100%; }
+}
+
 /* ── Mobile action bar ────────────────────────────────────────────────────── */
 .mobileBar {
   display: none;
@@ -493,7 +737,7 @@
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 1080px) {
-  .roles { grid-template-columns: repeat(2, 1fr); }
+  .roles { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .role, .role:nth-child(4), .role:nth-child(5) { grid-column: span 1; }
   .role:last-child { grid-column: span 2; }
   .benefits { grid-template-columns: repeat(2, 1fr); }
@@ -511,21 +755,22 @@
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  overflow: hidden;
+  gap: 18px;
 }
 .counter {
   position: relative;
-  background: var(--t-900);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--surface-hi), var(--surface) 50%);
+  background-color: var(--t-900);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--edge);
   padding: 34px 24px 30px;
   text-align: center;
-  transition: background var(--e-slow);
+  transition: border-color var(--e-slow), box-shadow var(--e-slow);
   isolation: isolate;
 }
-.counter:hover { background: var(--surface-hi); }
+.counter:hover { border-color: var(--line-hi); box-shadow: var(--shadow-lg), var(--edge); }
 
 /* The pool of light the model sits in. It is also the whole design of the card
    when WebGL is missing, which is why it is a real element and not a shadow on
@@ -590,12 +835,13 @@
   .heroArt { order: -1; }
   .heroEmblem { width: min(78%, 400px); }
   .heroBadge { inset-inline-start: 50%; transform: translateX(50%); inset-block-end: -4%; }
+  .stageRings { --rings-at: 50% 24%; --rings-size: 520px 460px; }
   /* Text before picture in both rows once they stack, so the reason to look at
      the picture always arrives first. */
   .splitFlip .splitArt { order: 2; }
   .splitArt img { width: min(74%, 380px); }
-  .footerGrid { grid-template-columns: 1fr 1fr; }
-  .footerBrand { grid-column: span 2; }
+  .footerGrid { grid-template-columns: 1fr 1fr 1fr; }
+  .footerBrand { grid-column: span 3; }
 }
 
 @media (max-width: 640px) {
@@ -603,15 +849,11 @@
   .role, .role:last-child, .role:nth-child(4), .role:nth-child(5) { grid-column: span 1; }
   .benefits { grid-template-columns: 1fr; }
   .benefit + .benefit { border-inline-start: 0; border-top: 1px solid var(--line); }
-  .steps { --rail: 46px; --gap: 14px; }
-  .stepConnector { height: clamp(56px, 7vw, 88px); }
-  .stepBody { padding-top: 5px; }
-  .stepBody h3 { font-size: 18px; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat:nth-child(3) { grid-column: span 2; border-inline-start: 0; border-top: 1px solid var(--line); }
   /* One counter per row on a phone: side by side, the model shrinks to a
      thumbnail and the number it belongs to stops being the loud thing. */
-  .counters { grid-template-columns: 1fr; }
+  .counters { grid-template-columns: 1fr; gap: 14px; }
   .counter { padding-block: 26px 24px; }
 }
 

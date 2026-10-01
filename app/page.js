@@ -11,7 +11,24 @@ import StatScene from "./components/StatScene";
 import Parallax from "./components/Parallax";
 import ScrollProgress from "./components/ScrollProgress";
 import Faq from "./components/Faq";
+import HowItWorks from "./components/HowItWorks";
 import { getPlatformStats } from "./lib/stats";
+import {
+  COMPANY,
+  HERO_FACTS,
+  ABOUT,
+  VISION,
+  SERVICES,
+  CHAIN,
+  PATIENT_STEPS,
+  ROLES,
+  PARTNER_BENEFITS,
+  TRUST,
+  ROADMAP,
+  FAQ,
+  COUNTERS,
+  PROFILE_PDF,
+} from "./content";
 import {
   IconStethoscope,
   IconPharmacy,
@@ -20,185 +37,48 @@ import {
   IconAmbulance,
   IconCheck,
   IconCrescent,
+  IconHome,
+  IconWallet,
+  IconRecord,
+  IconPhone,
+  IconChat,
+  IconDownload,
+  IconArrow,
 } from "./icons";
 
-// Latin digits, not Arabic-Indic. Both are correct Arabic typography — Libya
+// Latin digits, not Arabic-Indic. Both are correct Arabic typography; Libya
 // and the Maghreb generally set Latin numerals ("الأرقام الغبارية"), while the
 // Mashriq sets ٠١٢. The whole page uses one set, so the index numerals, the
 // step numbers and the counters all agree.
 const idx = (n) => String(n).padStart(2, "0");
 
-// The five partner roles are the ones that actually exist in the app's UserType
-// enum (lib/core/constants/enums.dart): medicalStaff, pharmacyAdmin,
-// pharmacyEmployee, deliverer, ambulanceDriver. Nothing here advertises a role
-// the product cannot actually create an account for.
-const ROLES = [
-  {
-    key: "medical",
-    icon: <IconStethoscope />,
-    title: "الأطباء والممرضون",
-    lead: "استقبل طلبات الزيارات المنزلية في المنطقة التي تخدمها، وأنت من يقرر متى تكون متاحًا.",
-    points: [
-      "طلبات زيارة تصلك حسب توفرك",
-      "إدارة المواعيد والزيارات القائمة",
-      "متابعة الأرباح من حسابك",
-    ],
-  },
-  {
-    key: "pharmacy",
-    icon: <IconPharmacy />,
-    title: "الصيدليات",
-    lead: "استقبل طلبات الأدوية من المرضى القريبين منك، وسعّرها وأكّدها من لوحة الصيدلية.",
-    points: [
-      "استقبال طلبات الأدوية وتسعيرها",
-      "إدارة المخزون وفريق العمل",
-      "تسليم بالتوصيل أو بالاستلام من الصيدلية",
-    ],
-  },
-  {
-    key: "staff",
-    icon: <IconBox />,
-    title: "موظفو الصيدلية",
-    lead: "حساب بصلاحيات محددة لتحضير الطلبات وتسليمها دون الوصول إلى إعدادات الصيدلية.",
-    points: [
-      "تحضير الطلبات وتجهيزها",
-      "تسليم للاستلام أو لمندوب التوصيل",
-      "صلاحيات منفصلة عن حساب المالك",
-    ],
-  },
-  {
-    key: "courier",
-    icon: <IconScooter />,
-    title: "مندوبو التوصيل",
-    lead: "استلم طلبات التوصيل القريبة منك وتابع مسارها حتى التسليم.",
-    points: [
-      "عروض توصيل تقبلها أو ترفضها",
-      "تتبع الطلب حتى تسليمه",
-      "سجل واضح لكل عملية توصيل",
-    ],
-  },
-  {
-    key: "ambulance",
-    icon: <IconAmbulance />,
-    title: "سائقو الإسعاف",
-    lead: "استقبل طلبات الطوارئ القريبة منك وتابعها من القبول حتى الوصول.",
-    points: [
-      "طلبات طوارئ حسب موقعك",
-      "متابعة الحالة خطوة بخطوة",
-      "تنبيه فوري عند وصول طلب جديد",
-    ],
-    urgent: true,
-  },
+// Icons live here rather than in content.js, so the content file stays plain
+// data that the printable profile can read too.
+const SERVICE_ICON = {
+  visit: <IconHome />,
+  pharmacy: <IconPharmacy />,
+  delivery: <IconScooter />,
+  emergency: <IconAmbulance />,
+};
+const ROLE_ICON = {
+  medical: <IconStethoscope />,
+  pharmacy: <IconPharmacy />,
+  staff: <IconBox />,
+  courier: <IconScooter />,
+  ambulance: <IconAmbulance />,
+};
+const CHAIN_ICON = [<IconHome key="a" />, <IconRecord key="b" />, <IconPharmacy key="c" />, <IconScooter key="d" />, <IconRecord key="e" />];
+
+// The marquee needs its list twice for a seamless loop. It names every service
+// and every partner role the page goes on to describe.
+const TICKER_ITEMS = [
+  ...SERVICES.map((x) => ({ key: `s-${x.key}`, icon: SERVICE_ICON[x.key], title: x.title })),
+  ...ROLES.map((x) => ({ key: `r-${x.key}`, icon: ROLE_ICON[x.key], title: x.title })),
 ];
+const TICKER = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
-const BENEFITS = [
-  {
-    title: "طلبات تصلك، لا تبحث عنها",
-    text: "المرضى يطلبون من التطبيق، والطلب يصل إلى الحساب المناسب في منطقتك بدل الاعتماد على الإعلان والاتصال.",
-  },
-  {
-    title: "أنت من يحدد توفرك",
-    text: "تستقبل الطلبات حين تكون متاحًا فقط، وتقبل أو ترفض كل طلب على حدة.",
-  },
-  {
-    title: "لوحة تحكم لعملك",
-    text: "لكل نوع حساب واجهة مصمّمة لعمله: الطبيب يرى زياراته، والصيدلية ترى طلباتها ومخزونها.",
-  },
-  {
-    title: "سجل مالي واضح",
-    text: "تتابع أرباحك ومعاملاتك من داخل التطبيق، بسجل لكل عملية تمت عبر المنصة.",
-  },
-];
 
-const STEPS = [
-  { title: "افتح التطبيق", text: "من أي متصفح أو هاتف، دون الحاجة إلى زيارة مكتب." },
-  { title: "اختر نوع حسابك", text: "طبيب، ممرض، صيدلية، مندوب توصيل، أو سائق إسعاف." },
-  { title: "أرسل بياناتك", text: "أكمل بيانات النشاط والمستندات المطلوبة لنوع حسابك." },
-  { title: "ابدأ الاستقبال", text: "بعد مراجعة البيانات وتفعيل الحساب تبدأ الطلبات بالوصول." },
-];
-
-const FAQ = [
-  {
-    q: "هل الانضمام إلى المنصة مجاني؟",
-    a: "إنشاء الحساب وإرسال بياناتك للمراجعة لا يتطلب رسوم اشتراك. تفاصيل العمولة على الطلبات تُوضّح لك عند تفعيل الحساب.",
-  },
-  {
-    q: "كم يستغرق تفعيل الحساب؟",
-    a: "بعد إرسال بياناتك يمر الحساب بمراجعة قبل التفعيل، والمدة تعتمد على اكتمال المستندات المطلوبة لنوع حسابك.",
-  },
-  {
-    q: "هل أستطيع تحديد أوقات عملي؟",
-    a: "نعم. تستقبل الطلبات حين تكون متاحًا فقط، ويمكنك قبول أو رفض كل طلب يصلك على حدة.",
-  },
-  {
-    q: "ما المستندات المطلوبة؟",
-    a: "تختلف حسب نوع الحساب: الأطباء والممرضون يثبتون ترخيص المزاولة، والصيدليات تثبت ترخيص الصيدلية، ومقدمو التوصيل والإسعاف يثبتون الهوية ورخصة القيادة.",
-  },
-  {
-    q: "هل الخدمة متاحة في كل ليبيا؟",
-    a: "التغطية تتوسع تدريجيًا مع انضمام مزودين جدد في كل منطقة، ويمكنك التسجيل حتى إن لم تكن منطقتك مغطاة بعد.",
-  },
-  {
-    q: "كيف أتابع أرباحي؟",
-    a: "من حسابك داخل التطبيق تجد سجل معاملاتك وأرباحك، مع تفاصيل كل طلب أُنجز عبر المنصة.",
-  },
-];
-
-// The marquee needs its list twice for a seamless loop; building the pair here
-// keeps the duplication out of the markup.
-const TICKER = [...ROLES, ...ROLES];
-
-/**
- * One segment of the joining road: a single cubic drawn in a 100×100 box,
- * leaving one dot and arriving at the next.
- *
- * The two control points sit on OPPOSITE sides of the axis, which is what makes
- * this a wave rather than a bulge — and it means the curve leaves each dot
- * heading down-and-right and arrives at the next one heading down-and-right
- * too. Consecutive segments therefore meet at the same tangent, so four
- * separate paths read as one continuous line with no kink at the joints.
- */
-const STEP_WAVE = "M50 0C92 28 8 72 50 100";
-
-/**
- * Section label: index numeral, caption, hairline.
- *
- * The numeral and the caption stay adjacent and the rule fills what is left —
- * putting the rule *between* them pushed the caption away from the number it
- * belongs to, which read as two unrelated bits of chrome. A centred label gets
- * a rule on both sides so the pair sits in the middle of its own bracket.
- */
-/* The three live counters, in the order a partner cares about them: the
-   businesses already on the platform, the clinicians already verified, and the
-   patients those two would be serving. Each carries the 3D object that stands
-   for it in the hero orbit, so the vocabulary is the same one the page opened
-   with. `note` says what the number actually counts — a counter that will not
-   say what it measures is a counter nobody has to stand behind. */
-const COUNTERS = [
-  {
-    key: "pharmacies",
-    model: "pharmacy",
-    unit: "صيدلية شريكة",
-    note: "صيدليات مفعّلة تستقبل الطلبات الآن",
-  },
-  {
-    key: "medicalStaff",
-    model: "medical",
-    unit: "طبيب وممرض",
-    note: "كوادر اكتملت مراجعة رخصتها واعتُمدت",
-  },
-  {
-    key: "patients",
-    model: "patients",
-    unit: "حساب مريض نشط",
-    note: "حسابات مرضى قائمة على المنصة",
-  },
-];
-
-/* Latin numerals inside an Arabic date, matching the rest of the page. The
-   `-u-nu-latn` extension is what forces that: plain "ar-LY" would render ٠١٢
-   and put two numeral systems on one screen. Tripoli time, because the reader
-   is in Libya and a UTC stamp would be quietly wrong for a third of the day. */
+/* Latin numerals inside an Arabic date, in Tripoli time. */
 const stampFmt = new Intl.DateTimeFormat("ar-LY-u-nu-latn", {
   timeZone: "Africa/Tripoli",
   dateStyle: "medium",
@@ -211,6 +91,7 @@ function stamp(iso) {
   return Number.isNaN(d.getTime()) ? null : stampFmt.format(d);
 }
 
+/** Section label: index numeral, caption, hairline. */
 function Label({ no, children, mid = false }) {
   return (
     <div className={`label ${mid ? "labelMid" : ""}`} data-reveal="fade">
@@ -222,89 +103,108 @@ function Label({ no, children, mid = false }) {
   );
 }
 
-export default async function PartnersPage() {
-  // Live counts, read on the server while this page is rendered. Null means the
-  // backend did not answer, and the counters section is then not rendered at
-  // all — see lib/stats.js for why that beats showing zeros.
+function Checks({ items }) {
+  return (
+    <ul className={s.checks}>
+      {items.map((t, i) => (
+        <li key={t} data-reveal="" style={{ "--i": i + 2 }}>
+          <IconCheck />
+          <span>{t}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default async function ProfilePage() {
+  // Live counts, read on the server. Null means the backend did not answer,
+  // and the numbers section is then not rendered at all (see lib/stats.js).
   const stats = await getPlatformStats();
   const updated = stats ? stamp(stats.updatedAt) : null;
 
-  const faqJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  };
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: COMPANY.name,
+      description: COMPANY.oneLine,
+      url: SITE.partnersUrl,
+      areaServed: "LY",
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: COMPANY.phone,
+        contactType: "customer support",
+        availableLanguage: "Arabic",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: FAQ.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ];
 
   return (
     <>
-      {/* A JSON-LD data block, not executed script, so a strict CSP does not
-          block it and crawlers read it straight out of the served HTML. */}
+      {/* JSON-LD data blocks, not executed script, so a strict CSP does not
+          block them and crawlers read them straight out of the served HTML. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <a className="skipLink" href="#roles">
+      <a className="skipLink" href="#about">
         تخطّي إلى المحتوى
       </a>
       <div id="scroll-progress" aria-hidden="true" />
       <ScrollProgress />
-      <SiteNav withNumbers={Boolean(stats)} />
+      <SiteNav />
 
       <Reveal>
+        {/* ── Hero: who we are ─────────────────────────────────────────── */}
         <div className={s.stage} id="top">
+          <span className={`rings ${s.stageRings}`} aria-hidden="true" />
           <div className={`wrap ${s.stageInner}`}>
             <header className={s.hero}>
               <div className={s.heroCopy}>
                 <span className="eyebrow" data-reveal="fade">
-                  <i /> منصة الشركاء
+                  <i /> منصة رعاية صحية ليبية
                 </span>
                 <h1 className="pageTitle" data-reveal="rise" style={{ "--i": 1 }}>
-                  وسّع نطاق عملك
+                  الرعاية الصحية
                   <br />
-                  <span className={s.heroAccent}>مع دكتور لعندك</span>
+                  <span className={s.heroAccent}>تصل إلى بابك</span>
                 </h1>
                 <p className="bodyLarge" data-reveal="" style={{ "--i": 2 }}>
-                  انضم كطبيب أو ممرض أو صيدلية أو مندوب توصيل أو سائق إسعاف،
-                  واستقبل طلبات المرضى في منطقتك من منصة واحدة بواجهة عربية
-                  مصمّمة لعملك.
+                  {COMPANY.oneLine}
                 </p>
                 <div className={s.heroCtas} data-reveal="" style={{ "--i": 3 }}>
                   <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
-                    سجّل حسابك الآن
+                    افتح التطبيق
                   </MagneticLink>
-                  <MagneticLink className="btn btnGhost" href="#roles">
-                    تعرّف على أنواع الحسابات
+                  <MagneticLink className="btn btnGhost" href="#partners">
+                    انضم كشريك
                   </MagneticLink>
                 </div>
                 <div className={s.stats} data-reveal="" style={{ "--i": 4 }}>
-                  <div className={s.stat}>
-                    <b>
-                      <CountUp to={5} />
-                    </b>
-                    <span>أنواع حسابات</span>
-                  </div>
-                  <div className={s.stat}>
-                    <b>
-                      <CountUp to={24} suffix="/7" />
-                    </b>
-                    <span>طلبات الطوارئ</span>
-                  </div>
-                  <div className={s.stat}>
-                    <b>عربي</b>
-                    <span>واجهة كاملة</span>
-                  </div>
+                  {HERO_FACTS.map((f) => (
+                    <div key={f.label} className={s.stat}>
+                      <b>
+                        <CountUp to={f.value} />
+                      </b>
+                      <span>{f.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* The emblem is the page's one focal object. The WebGL orbit is
-                  mounted INSIDE this box and centred on it — five satellites,
-                  one per account type, converging on the mark. That is the
-                  whole argument of the page, running as an animation. */}
+              {/* The emblem is the page's one focal object, with the WebGL
+                  orbit mounted inside it: five satellites, one per partner
+                  role, converging on the mark. */}
               <Parallax className={s.heroArt} speed={0.05} tilt={2} data-reveal="scale" style={{ "--i": 2 }}>
                 <div className={s.heroEmblem}>
                   <span className={s.heroGlow} aria-hidden="true" />
@@ -318,15 +218,13 @@ export default async function PartnersPage() {
                   />
                   <OrbitScene />
                   <div className={s.heroBadge}>
-                    <IconCrescent /> حسابك يبدأ خلال دقائق
+                    <IconCrescent /> طبيب، دواء، إسعاف، في تطبيق واحد
                   </div>
                 </div>
               </Parallax>
             </header>
           </div>
 
-          {/* A moving list of exactly the account types the page goes on to
-              describe — a summary that happens to be in motion, not filler. */}
           <div className={`marquee ${s.ticker}`} aria-hidden="true">
             <div className="marqueeTrack">
               {TICKER.map((r, i) => (
@@ -339,26 +237,23 @@ export default async function PartnersPage() {
           </div>
         </div>
 
-        {/* The live counters, first thing under the hero: a partner deciding
-            whether to join asks how big the network already is before anything
-            else on this page can matter. The numbers come from the platform's
-            own database, not from this file. */}
+        {/* ── Live numbers ─────────────────────────────────────────────── */}
         {stats && (
           <section id="numbers" className={`${s.bandA} section`}>
             <div className="wrap">
               <div className="sectionHead mid">
                 {/* An eyebrow rather than an indexed Label: this section is
                     conditional on the backend answering, and a numeral that
-                    shifts 01→02 depending on a fetch is not an index. */}
+                    shifts depending on a fetch is not an index. */}
                 <span className="eyebrow" data-reveal="fade">
-                  <i /> أرقام المنصة
+                  <i /> المنصة اليوم
                 </span>
                 <h2 className="sectionTitle" data-reveal="">
-                  الشبكة التي ستنضم إليها
+                  أرقام <span className="accent">من قاعدة البيانات</span>
                 </h2>
                 <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
-                  أرقام حقيقية من قاعدة بيانات المنصة، لا تقديرات، وتُحدَّث
-                  تلقائيًا على مدار اليوم.
+                  أرقام حقيقية من المنصة نفسها، لا تقديرات، وتُحدَّث تلقائيًا
+                  على مدار اليوم.
                 </p>
               </div>
 
@@ -385,30 +280,212 @@ export default async function PartnersPage() {
           </section>
         )}
 
-        <section id="roles" className={`${s.bandB} section`}>
+        {/* ── 01 About: the problem and our answer ─────────────────────── */}
+        <section id="about" className={`${s.bandB} section`}>
+          <div className="aurora" aria-hidden="true" />
+          <div className="wrap">
+            <div className="sectionHead">
+              <Label no={1}>من نحن</Label>
+              <h2 className="sectionTitle" data-reveal="">
+                رعاية لا تعتمد على <span className="accent">من تعرف</span>
+              </h2>
+            </div>
+
+            <div className={s.about}>
+              <div className={s.aboutStory}>
+                <blockquote className={s.quote} data-reveal="">
+                  <IconCrescent />
+                  <p>{ABOUT.quote}</p>
+                </blockquote>
+                <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                  {ABOUT.lead}
+                </p>
+                <p className={s.idea} data-reveal="" style={{ "--i": 2 }}>
+                  الفكرة كلها: {COMPANY.idea}
+                </p>
+              </div>
+
+              <div className={s.aboutSide}>
+                <div className={s.problemCard} data-reveal="" style={{ "--i": 1 }}>
+                  <h3>ما الذي يحدث اليوم</h3>
+                  <ol>
+                    {ABOUT.problems.map((p, i) => (
+                      <li key={p}>
+                        <b>{idx(i + 1)}</b>
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <div className={s.answerCard} data-reveal="" style={{ "--i": 2 }}>
+                  <h3>{ABOUT.answerTitle}</h3>
+                  <p>{ABOUT.answer}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 02 Vision, mission, values ───────────────────────────────── */}
+        <section id="vision" className={`${s.bandA} section`}>
+          <div className="wrap">
+            <div className="sectionHead mid">
+              <Label no={2} mid>
+                الرؤية والرسالة
+              </Label>
+              <h2 className="sectionTitle" data-reveal="">
+                من دقائق، <span className="accent">لا من أيام</span>
+              </h2>
+            </div>
+
+            <div className={s.vmGrid}>
+              <article className={s.vmCard} data-reveal="">
+                <span className={s.vmTag}>الرؤية</span>
+                <p>{VISION.vision}</p>
+              </article>
+              <article className={s.vmCard} data-reveal="" style={{ "--i": 1 }}>
+                <span className={s.vmTag}>الرسالة</span>
+                <p>{VISION.mission}</p>
+              </article>
+            </div>
+
+            <h3 className={s.subHead} data-reveal="">قيمنا</h3>
+            <div className={s.benefits}>
+              {VISION.values.map((b, i) => (
+                <article key={b.title} className={s.benefit} data-reveal="" style={{ "--i": i }}>
+                  <span className={s.benefitNo}>{idx(i + 1)}</span>
+                  <h3>{b.title}</h3>
+                  <p>{b.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 03 Services + the chain ──────────────────────────────────── */}
+        <section id="services" className={`${s.bandB} section`}>
+          <div className="wrap">
+            <div className="sectionHead mid">
+              <Label no={3} mid>
+                خدماتنا
+              </Label>
+              <h2 className="sectionTitle" data-reveal="">
+                أربع خدمات، <span className="accent">تطبيق واحد</span>
+              </h2>
+              <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                كل ما يحتاجه المريض من لحظة شعوره بالتعب حتى يصله الدواء.
+              </p>
+            </div>
+
+            <div className={s.services}>
+              {SERVICES.map((x, i) => (
+                <TiltCard
+                  key={x.key}
+                  max={4}
+                  className={`${s.role} ${s.service} ${x.urgent ? s.urgent : ""}`}
+                  data-reveal=""
+                  style={{ "--i": i }}
+                >
+                  <div className={s.roleTop}>
+                    <div className={s.roleIcon}>{SERVICE_ICON[x.key]}</div>
+                    <span className={s.roleNo}>{idx(i + 1)}</span>
+                  </div>
+                  <h3>{x.title}</h3>
+                  <p>{x.text}</p>
+                </TiltCard>
+              ))}
+            </div>
+
+            <div className={`${s.split} ${s.chainSplit}`}>
+              <div className={s.splitTxt}>
+                <h3 className="sectionTitle" data-reveal="">
+                  الحلقات <span className="accent">تعرف بعضها</span>
+                </h3>
+                <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                  {CHAIN.lead}
+                </p>
+                <ol className={s.chain} data-reveal="" style={{ "--i": 2 }}>
+                  {CHAIN.links.map((l, i) => (
+                    <li key={l}>
+                      <span className={s.chainNode}>
+                        {CHAIN_ICON[i]}
+                        {l}
+                      </span>
+                      {i < CHAIN.links.length - 1 && (
+                        <span className={s.chainArrow} aria-hidden="true">
+                          <IconArrow />
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+                <div className={s.chainPoints}>
+                  {CHAIN.points.map((p, i) => (
+                    <div key={p.title} className={s.chainPoint} data-reveal="" style={{ "--i": i + 3 }}>
+                      {i === 2 ? <IconWallet /> : <IconCheck />}
+                      <div>
+                        <h4>{p.title}</h4>
+                        <p>{p.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Parallax className={s.splitArt} speed={0.09} data-reveal="scale">
+                <span className={s.splitGlow} aria-hidden="true" />
+                <Image
+                  src="/render/request-flow.webp"
+                  alt="هاتف زجاجي مجسّم تطفو أمامه بطاقتا طلب، يرمزان لانتقال الطلب بين حلقات الخدمة"
+                  width={1024}
+                  height={1024}
+                  sizes="(max-width: 900px) 74vw, 44vw"
+                />
+              </Parallax>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 04 How it works for a patient ────────────────────────────── */}
+        <section id="how" className={`${s.bandA} section`}>
+          <div className="wrap">
+            <div className="sectionHead mid">
+              <Label no={4} mid>
+                كيف تعمل
+              </Label>
+              <h2 className="sectionTitle" data-reveal="">
+                أربع خطوات{" "}
+                <span className="accent">{"حتى تصلك الرعاية"}</span>
+              </h2>
+            </div>
+            {/* Steps on the right with a rail, a sticky phone on the left that
+                shows each step's screen. See components/HowItWorks.js. */}
+            <HowItWorks steps={PATIENT_STEPS} />
+          </div>
+        </section>
+
+        {/* ── 05 Partners ──────────────────────────────────────────────── */}
+        <section id="partners" className={`${s.bandB} section`}>
           <div className="aurora" aria-hidden="true" />
           <div className="wrap">
             <div className="sectionHead mid">
-              <Label no={1} mid>
-                من ينضم إلينا
+              <Label no={5} mid>
+                شركاؤنا
               </Label>
               <h2 className="sectionTitle" data-reveal="">
-                خمسة حسابات، خمس واجهات
+                خمسة حسابات، <span className="accent">خمس واجهات</span>
               </h2>
               <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
-                لكل نوع حساب واجهة مصمّمة لعمله، لا نسخة واحدة تصلح للجميع.
+                دكتور لعندك لا توظّف الأطباء ولا تملك الصيدليات ولا تشغّل
+                سيارات الإسعاف. هي الطبقة التي تنظّم اللقاء بينهم وبين المريض،
+                ولكل شريك واجهة مصمّمة لعمله.
               </p>
             </div>
 
             <div className={s.roles} data-reveal="">
               {ROLES.map((r, i) => (
-                <TiltCard
-                  key={r.key}
-                  max={4}
-                  className={`${s.role} ${r.urgent ? s.urgent : ""}`}
-                >
+                <TiltCard key={r.key} max={4} className={`${s.role} ${r.urgent ? s.urgent : ""}`}>
                   <div className={s.roleTop}>
-                    <div className={s.roleIcon}>{r.icon}</div>
+                    <div className={s.roleIcon}>{ROLE_ICON[r.key]}</div>
                     <span className={s.roleNo}>{idx(i + 1)}</span>
                   </div>
                   <h3>{r.title}</h3>
@@ -424,21 +501,10 @@ export default async function PartnersPage() {
                 </TiltCard>
               ))}
             </div>
-          </div>
-        </section>
 
-        <section id="benefits" className={`${s.bandA} section`}>
-          <div className="wrap">
-            <div className="sectionHead">
-              <Label no={2}>لماذا المنصة</Label>
-              <h2 className="sectionTitle" data-reveal="">
-                المنصة توصّل الطلب،
-                <br />
-                وأنت تتفرغ للعمل
-              </h2>
-            </div>
+            <h3 className={s.subHead} data-reveal="">لماذا ينضم الشركاء</h3>
             <div className={s.benefits}>
-              {BENEFITS.map((b, i) => (
+              {PARTNER_BENEFITS.map((b, i) => (
                 <article key={b.title} className={s.benefit} data-reveal="" style={{ "--i": i }}>
                   <span className={s.benefitNo}>{idx(i + 1)}</span>
                   <h3>{b.title}</h3>
@@ -446,175 +512,131 @@ export default async function PartnersPage() {
                 </article>
               ))}
             </div>
-          </div>
-        </section>
 
-        <section className={`${s.bandB} section`}>
-          <div className="wrap">
-            <div className={s.split}>
-              <div className={s.splitTxt}>
-                <Label no={3}>الطلب</Label>
-                <h3 className="sectionTitle" data-reveal="">
-                  يصل إليك جاهزًا
-                </h3>
-                <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
-                  المريض يحدد الخدمة والعنوان قبل الإرسال، فيصلك الطلب بتفاصيله
-                  كاملة بدل مكالمة تشرح فيها كل شيء من البداية.
-                </p>
-                <ul className={s.checks}>
-                  {[
-                    "تفاصيل الخدمة والعنوان قبل القبول",
-                    "قبول أو رفض لكل طلب على حدة",
-                    "متابعة الحالة حتى اكتمال الخدمة",
-                  ].map((t, i) => (
-                    <li key={t} data-reveal="" style={{ "--i": i + 2 }}>
-                      <IconCheck />
-                      <span>{t}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <Parallax className={s.splitArt} speed={0.09} data-reveal="scale">
-                <span className={s.splitGlow} aria-hidden="true" />
-                <Image
-                  src="/render/request-flow.webp"
-                  alt="هاتف زجاجي مجسّم تطفو أمامه بطاقتا طلب، يرمزان لوصول الطلب بتفاصيله"
-                  width={1024}
-                  height={1024}
-                  sizes="(max-width: 900px) 74vw, 44vw"
-                />
-              </Parallax>
+            <div className={s.partnerCta} data-reveal="">
+              <p>
+                التسجيل لا يتطلب رسوم اشتراك. اختر نوع حسابك وأرسل بياناتك
+                للمراجعة.
+              </p>
+              <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
+                سجّل كشريك
+              </MagneticLink>
             </div>
           </div>
         </section>
 
-        <section className={`${s.bandA} section`}>
+        {/* ── 06 Trust ─────────────────────────────────────────────────── */}
+        <section id="trust" className={`${s.bandA} section`}>
           <div className="wrap">
             <div className={`${s.split} ${s.splitFlip}`}>
               <Parallax className={s.splitArt} speed={0.09} data-reveal="scale">
                 <span className={s.splitGlow} aria-hidden="true" />
                 <Image
                   src="/render/trust-shield.webp"
-                  alt="درع زجاجي مجسّم بداخله قفل، يرمز إلى مراجعة الحسابات وحماية السجل الطبي"
+                  alt="درع زجاجي مجسّم بداخله قفل، يرمز إلى التحقق من المزودين وحماية السجل الطبي"
                   width={1024}
                   height={1024}
                   sizes="(max-width: 900px) 74vw, 44vw"
                 />
               </Parallax>
               <div className={s.splitTxt}>
-                <Label no={4}>الثقة</Label>
+                <Label no={6}>الثقة والخصوصية</Label>
                 <h3 className="sectionTitle" data-reveal="">
-                  موثوقة من الطرفين
+                  موثوقة <span className="accent">من الطرفين</span>
                 </h3>
                 <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
-                  حسابات مقدمي الخدمة تمر بمراجعة قبل التفعيل، وسجل المريض الطبي
-                  لا يُفتح لك إلا حين يختار هو مشاركته.
+                  {TRUST.statement}
                 </p>
-                <ul className={s.checks}>
-                  {[
-                    "مراجعة البيانات قبل تفعيل الحساب",
-                    "صلاحيات مختلفة لكل نوع حساب",
-                    "سجل المريض يُشارك بموافقته",
-                  ].map((t, i) => (
-                    <li key={t} data-reveal="" style={{ "--i": i + 2 }}>
-                      <IconCheck />
-                      <span>{t}</span>
-                    </li>
-                  ))}
-                </ul>
+                <Checks items={TRUST.points} />
               </div>
             </div>
           </div>
         </section>
 
-        <section id="how" className={`${s.bandB} section`}>
+        {/* ── 07 Roadmap ───────────────────────────────────────────────── */}
+        <section id="roadmap" className={`${s.bandB} section`}>
           <div className="wrap">
             <div className="sectionHead mid">
-              <Label no={5} mid>
-                خطوات الانضمام
+              <Label no={7} mid>
+                ما القادم
               </Label>
-              {/* Non-breaking space: "أول طلب" is one idea and was breaking
-                  across two lines, leaving "طلب" alone as a widow. */}
               <h2 className="sectionTitle" data-reveal="">
-                {"أربع خطوات حتى أول طلب"}
+                خارطة <span className="accent">التطوير</span>
               </h2>
+              <p className="bodyLarge" data-reveal="" style={{ "--i": 1 }}>
+                خطط معلنة نعمل عليها، وليست متاحة في التطبيق بعد.
+              </p>
             </div>
-            {/* A vertical road rather than four boxes in a row: the steps are a
-                journey with an order, and a line you travel down says that in a
-                way four side-by-side cards never did. The teal fills in behind
-                you as each step scrolls into view. */}
-            <ol className={s.steps}>
-              {STEPS.map((st, i) => (
-                <li key={st.title} className={s.step} data-reveal="" style={{ "--i": i }}>
-                  <span className={s.stepNo}>{i + 1}</span>
-                  <div className={s.stepBody}>
-                    <h3>{st.title}</h3>
-                    <p>{st.text}</p>
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className={s.stepConnector}>
-                      <svg
-                        className={s.stepWave}
-                        viewBox="0 0 100 100"
-                        preserveAspectRatio="none"
-                        aria-hidden="true"
-                      >
-                        <path className={s.waveBase} d={STEP_WAVE} />
-                        <path className={s.waveFill} d={STEP_WAVE} />
-                      </svg>
-                    </div>
-                  )}
-                </li>
+            <div className={s.roadmap}>
+              {ROADMAP.map((r, i) => (
+                <article key={r.title} className={s.roadItem} data-reveal="" style={{ "--i": i }}>
+                  <span className={s.soon}>قريبًا</span>
+                  <h3>{r.title}</h3>
+                  <p>{r.text}</p>
+                </article>
               ))}
-            </ol>
+            </div>
           </div>
         </section>
 
+        {/* ── 08 FAQ ───────────────────────────────────────────────────── */}
         <section id="faq" className={`${s.bandA} section`}>
           <div className="wrap">
             <div className="sectionHead mid">
-              <Label no={6} mid>
+              <Label no={8} mid>
                 أسئلة شائعة
               </Label>
               <h2 className="sectionTitle" data-reveal="">
-                ما يسأل عنه الشركاء
+                ما يسأل عنه <span className="accent">الناس</span>
               </h2>
             </div>
             <Faq items={FAQ} />
           </div>
         </section>
 
-        <section className={`${s.bandB} ${s.finalWrap} section`}>
+        {/* ── Contact ──────────────────────────────────────────────────── */}
+        <section id="contact" className={`${s.bandB} ${s.finalWrap} section`}>
           <div className="aurora" aria-hidden="true" />
           <div className="wrap">
-            {/* The Red Crescent, closing the page. It is the emblem the Red
-                Cross movement itself uses across the Muslim world, so it is the
-                correct medical mark for a Libyan audience — and it is the one
-                place on the page where --danger is allowed to be large. */}
-            <Parallax className={s.finalMark} speed={0.06} data-reveal="scale">
-              <span className={s.finalGlow} aria-hidden="true" />
-              <Image
-                src="/render/red-crescent.webp"
-                alt="الهلال الأحمر مجسّمًا، رمز الخدمات الطبية والطوارئ"
-                width={1024}
-                height={1024}
-                sizes="(max-width: 900px) 46vw, 260px"
-              />
-            </Parallax>
-            <h2 className="sectionTitle" data-reveal="" style={{ "--i": 1 }}>
-              جاهز للانضمام؟
-            </h2>
-            <p className="bodyLarge" data-reveal="" style={{ "--i": 2 }}>
-              أنشئ حسابك واختر نوعه، وأرسل بياناتك للمراجعة. الطلبات تبدأ
-              بالوصول فور تفعيل الحساب.
-            </p>
-            <div className={s.finalCtas} data-reveal="" style={{ "--i": 3 }}>
-              <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
-                سجّل الآن
-              </MagneticLink>
-              <MagneticLink className="btn btnGhost" href={SITE.mainUrl}>
-                زيارة موقع المرضى
-              </MagneticLink>
+            <div className={s.finalPanel}>
+              <span className={`rings ${s.finalRings}`} aria-hidden="true" />
+              {/* The Red Crescent, closing the page: the correct medical mark
+                  for a Libyan audience, and the one place --danger is large. */}
+              <Parallax className={s.finalMark} speed={0.06} data-reveal="scale">
+                <span className={s.finalGlow} aria-hidden="true" />
+                <Image
+                  src="/render/red-crescent.webp"
+                  alt="الهلال الأحمر مجسّمًا، رمز الخدمات الطبية والطوارئ"
+                  width={1024}
+                  height={1024}
+                  sizes="(max-width: 900px) 46vw, 260px"
+                />
+              </Parallax>
+              <h2 className="sectionTitle" data-reveal="" style={{ "--i": 1 }}>
+                تواصل <span className="accent">معنا</span>
+              </h2>
+              <p className="bodyLarge" data-reveal="" style={{ "--i": 2 }}>
+                مريضًا كنت أو مقدّم خدمة أو جهة تريد أن تعرف عنا أكثر، فريق
+                الدعم يرد عليك هاتفيًا وعلى واتساب.
+              </p>
+              <div className={s.contactRow} data-reveal="" style={{ "--i": 3 }}>
+                <a className={s.contactChip} href={`tel:${COMPANY.phone}`}>
+                  <IconPhone />
+                  <span dir="ltr">{COMPANY.phoneDisplay}</span>
+                </a>
+                <a className={s.contactChip} href={COMPANY.whatsapp} target="_blank" rel="noopener noreferrer">
+                  <IconChat />
+                  واتساب
+                </a>
+              </div>
+              <div className={s.finalCtas} data-reveal="" style={{ "--i": 4 }}>
+                <MagneticLink className="btn btnPrimary" href={SITE.appUrl}>
+                  افتح التطبيق
+                </MagneticLink>
+                <MagneticLink className="btn btnGhost" href={PROFILE_PDF}>
+                  <IconDownload /> الملف التعريفي PDF
+                </MagneticLink>
+              </div>
             </div>
           </div>
         </section>
@@ -623,29 +645,37 @@ export default async function PartnersPage() {
           <div className="wrap">
             <div className={s.footerGrid}>
               <div className={s.footerBrand}>
-                <span className={s.footerName}>دكتور لعندك</span>
-                <p>
-                  منصة رعاية صحية في ليبيا تصل المرضى بالأطباء والصيدليات
-                  ومقدمي التوصيل والإسعاف من تطبيق واحد.
-                </p>
+                <span className={s.footerName}>{COMPANY.name}</span>
+                <p>{COMPANY.oneLine}</p>
               </div>
               <div className={s.footerCol}>
                 <h4>الصفحة</h4>
-                <a href="#roles">من ينضم إلينا</a>
-                <a href="#benefits">لماذا المنصة</a>
-                <a href="#how">خطوات الانضمام</a>
+                <a href="#about">من نحن</a>
+                <a href="#services">خدماتنا</a>
+                <a href="#partners">شركاؤنا</a>
                 <a href="#faq">أسئلة شائعة</a>
               </div>
               <div className={s.footerCol}>
                 <h4>روابط</h4>
-                <a href={SITE.mainUrl}>موقع المرضى</a>
                 <a href={SITE.appUrl}>فتح التطبيق</a>
                 <a href={SITE.appUrl}>تسجيل حساب شريك</a>
+                <a href={PROFILE_PDF}>الملف التعريفي PDF</a>
+              </div>
+              <div className={s.footerCol}>
+                <h4>تواصل</h4>
+                <a href={`tel:${COMPANY.phone}`} dir="ltr" className={s.footerPhone}>
+                  {COMPANY.phoneDisplay}
+                </a>
+                <a href={COMPANY.whatsapp} target="_blank" rel="noopener noreferrer">
+                  واتساب
+                </a>
               </div>
             </div>
             <div className={`${s.footerBar} bodySm`}>
-              <span>دكتور لعندك · صحتك تهمنا</span>
-              <span>ليبيا</span>
+              <span>
+                {COMPANY.name} · {COMPANY.tagline}
+              </span>
+              <span>{COMPANY.country}</span>
             </div>
           </div>
         </footer>
@@ -655,7 +685,7 @@ export default async function PartnersPage() {
           returns as a bar pinned to the thumb. */}
       <div className={s.mobileBar}>
         <a className="btn btnPrimary btnFull" href={SITE.appUrl}>
-          سجّل حسابك الآن
+          افتح التطبيق
         </a>
       </div>
     </>

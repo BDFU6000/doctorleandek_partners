@@ -8,25 +8,40 @@
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  /* Transparent over the hero, glass once you leave it. Both the background
-     and the rule animate, so the bar materialises instead of blinking on. */
-  background: transparent;
-  border-bottom: 1px solid transparent;
-  transition: background var(--e-slow), border-color var(--e-slow), backdrop-filter var(--e-slow);
-}
-.bar[data-stuck] {
-  background: rgba(6, 15, 19, 0.76);
-  border-bottom-color: var(--line);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  /* The bar itself never paints. Over the hero the content sits straight on
+     the canvas; once you leave it, the INNER row becomes a floating glass
+     capsule inset from the edges, the pattern four of the five Awwwards
+     references share (design/docs/01). The capsule grows out of the open row
+     rather than blinking on, because every property involved animates. */
+  pointer-events: none;
 }
 
 .inner {
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   width: 100%;
+  height: 62px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  transition:
+    background var(--e-slow),
+    border-color var(--e-slow),
+    box-shadow var(--e-slow),
+    max-width var(--e-slow),
+    padding var(--e-slow);
+}
+.bar[data-stuck] .inner {
+  max-width: 1200px;
+  width: calc(100% - 24px);
+  padding-inline: 12px 12px;
+  background: rgba(6, 15, 19, 0.72);
+  border-color: var(--line-hi);
+  box-shadow: var(--shadow), var(--edge);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 /* ── Brand ────────────────────────────────────────────────────────────────
@@ -152,7 +167,7 @@
   inset-inline: 12px;
   z-index: 58;
   padding: 18px;
-  border-radius: var(--r-card);
+  border-radius: var(--r-panel);
   background: var(--t-950);
   border: 1px solid var(--line-hi);
   box-shadow: var(--shadow-lg), var(--edge);
